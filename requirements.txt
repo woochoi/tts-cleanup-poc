@@ -1,0 +1,9 @@
+# Tested on macOS (Apple Silicon, MPS) with Python 3.11
+chatterbox-tts==0.1.7
+torch==2.6.0
+torchaudio==2.6.0
+numpy==1.26.4
+demucs==4.0.1
+faster-whisper==1.2.1
+setuptools<81
+anthropic>=2.9

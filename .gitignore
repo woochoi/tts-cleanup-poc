@@ -1,0 +1,28 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# environments and caches (rebuilt from requirements.txt)
+.venv/
+__pycache__/
+*.pyc
+cache/
+segments/
+.typecast-cache/
+*.log
+.worker.sock
+.worker.lock
+
+# voice reference recordings: use your own, see README
+refs/
+*.wav
+*.mp3
+!eval/samples/**/*.wav
+
+.DS_Store
+.ipynb_checkpoints/
+
+# voices people register in the booth
+custom_voices.json
+.custom.lock

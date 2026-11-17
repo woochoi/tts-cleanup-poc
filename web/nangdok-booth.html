@@ -1,0 +1,2939 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>낭독 부스</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+  :root {
+    /* Layout: one centered column — the script booth is the single raised card; voice settings and recent takes sit side by side below on wide screens */
+    --bg: #ECEFF3;
+    --surface: #FBFCFD;
+    --field: #F3F5F8;
+    --ink: #121821;
+    --muted: #586375;
+    --line: #D3D9E2;
+    --accent: #2343C4;
+    --accent-ink: #FFFFFF;
+    --accent-soft: rgba(35, 67, 196, 0.12);
+    --onair: #D4470E;
+    --onair-soft: rgba(212, 71, 14, 0.14);
+    --onair-glow: rgba(212, 71, 14, 0.45);
+    --warn: #8A5300;
+    --warn-soft: rgba(214, 140, 20, 0.16);
+    --ok: #1F7A4D;
+    --knob: #FFFFFF;
+    --shadow: 0 1px 2px rgba(18, 24, 33, 0.05), 0 18px 40px -22px rgba(18, 24, 33, 0.28);
+
+    --font-display: "Hahmlet", "Nanum Myeongjo", "AppleMyungjo", serif;
+    --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0E1218;
+      --surface: #161B23;
+      --field: #1C222C;
+      --ink: #E6EBF2;
+      --muted: #98A3B4;
+      --line: #2B3340;
+      --accent: #8FA5FF;
+      --accent-ink: #0E1218;
+      --accent-soft: rgba(143, 165, 255, 0.16);
+      --onair: #FF7A45;
+      --onair-soft: rgba(255, 122, 69, 0.16);
+      --onair-glow: rgba(255, 122, 69, 0.5);
+      --warn: #F0B45A;
+      --warn-soft: rgba(240, 180, 90, 0.14);
+    --ok: #5BC98E;
+      --knob: #E6EBF2;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 44px -22px rgba(0, 0, 0, 0.7);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0E1218;
+    --surface: #161B23;
+    --field: #1C222C;
+    --ink: #E6EBF2;
+    --muted: #98A3B4;
+    --line: #2B3340;
+    --accent: #8FA5FF;
+    --accent-ink: #0E1218;
+    --accent-soft: rgba(143, 165, 255, 0.16);
+    --onair: #FF7A45;
+    --onair-soft: rgba(255, 122, 69, 0.16);
+    --onair-glow: rgba(255, 122, 69, 0.5);
+    --warn: #F0B45A;
+    --warn-soft: rgba(240, 180, 90, 0.14);
+    --ok: #5BC98E;
+    --knob: #E6EBF2;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 44px -22px rgba(0, 0, 0, 0.7);
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 920px;
+    margin: 0 auto;
+    padding-block: 40px 56px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid;
+    gap: 20px;
+  }
+
+  /* Masthead */
+  .masthead {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .brand { display: grid; gap: 8px; min-width: 0; }
+  h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .lede { margin: 0; color: var(--muted); max-width: 46ch; text-wrap: pretty; word-break: keep-all; }
+
+  .lamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--muted);
+    font: 500 12px/1 var(--font-mono);
+    letter-spacing: 0.16em;
+    transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+  .lamp-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--line);
+    transition: background-color 0.2s, box-shadow 0.2s;
+  }
+  .lamp.on, .lamp.paused { color: var(--onair); border-color: var(--onair); }
+  .lamp.on { box-shadow: 0 0 0 3px var(--onair-soft); }
+  .lamp.on .lamp-dot { background: var(--onair); box-shadow: 0 0 10px var(--onair-glow); }
+  .lamp.paused .lamp-dot { background: var(--onair); animation: blink 1.1s steps(2, jump-none) infinite; }
+  @keyframes blink { 50% { opacity: 0.2; } }
+
+  /* Booth */
+  .booth {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+  }
+  .booth-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .eyebrow { font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: 0.04em; }
+  .meter {
+    font: 400 12.5px/1.4 var(--font-mono);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  #script, .prompter {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 14px 16px;
+    font: 400 1.125rem/1.8 var(--font-body);
+    color: var(--ink);
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+  #script { min-height: 10rem; resize: vertical; }
+  #script::placeholder { color: var(--muted); }
+  #script:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .prompter {
+    position: relative;
+    min-height: 10rem;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+  .seg {
+    border-radius: 5px;
+    cursor: pointer;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    transition: color 0.2s, background-color 0.2s;
+  }
+  .seg:hover { text-decoration: underline; text-decoration-color: var(--muted); text-underline-offset: 5px; }
+  .seg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .seg.done { color: var(--muted); }
+  .seg.active { background: var(--accent-soft); color: var(--ink); }
+  mark.word {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-radius: 3px;
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .examples { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .examples-label { font-size: 13px; color: var(--muted); }
+  .chip {
+    font: 500 13px/1 var(--font-body);
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+  .tones { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 10px; }
+  .tones legend { padding: 0; margin-bottom: 10px; }
+  .tone-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .tone { position: relative; display: block; min-width: 0; cursor: pointer; }
+  .tone input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+  .tone-card {
+    display: grid;
+    gap: 2px;
+    height: 100%;
+    padding: 10px 12px 11px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+  .tone-wave { display: block; width: 48px; height: 16px; margin-bottom: 6px; color: var(--muted); overflow: visible; }
+  .tone-name { font-size: 14px; font-weight: 600; }
+  .tone-desc { font-size: 12.5px; color: var(--muted); }
+  .tone:hover .tone-card { border-color: var(--muted); }
+  .tone input:checked + .tone-card { border-color: var(--accent); background: var(--accent-soft); }
+  .tone input:checked + .tone-card .tone-wave,
+  .tone input:checked + .tone-card .tone-name { color: var(--accent); }
+  .tone input:focus-visible + .tone-card { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .tone-note { margin: 0; font-size: 13px; color: var(--muted); word-break: keep-all; }
+  .tone-detail { display: block; margin-top: 4px; font-size: 12px; font-variant-numeric: tabular-nums; }
+  @media (max-width: 700px) {
+    .tone-grid { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+    .tone-card { grid-template-columns: 48px auto minmax(0, 1fr); align-items: center; column-gap: 12px; row-gap: 0; padding: 9px 12px; }
+    .tone-wave { margin-bottom: 0; }
+  }
+
+  .transport { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .btn-primary, .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 999px;
+    font: 600 15px/1 var(--font-body);
+    cursor: pointer;
+  }
+  .btn-primary {
+    min-width: 136px;
+    padding: 14px 22px 14px 18px;
+    border: none;
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
+  .btn-ghost {
+    padding: 13px 18px 13px 14px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+  }
+  .btn-ghost:hover:not(:disabled) { border-color: var(--ink); }
+  .btn-ghost:disabled { color: var(--muted); opacity: 0.55; cursor: default; }
+  .ico { display: inline-grid; place-items: center; }
+  #wave { flex: 1 1 180px; min-width: 0; height: 46px; display: block; }
+
+  .status-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 12px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  #status { font-variant-numeric: tabular-nums; }
+  kbd {
+    font: 400 11.5px/1 var(--font-mono);
+    padding: 2px 6px;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    background: var(--field);
+    color: var(--ink);
+  }
+  @media (hover: none) { .hint[data-mode="keys"] { display: none; } }
+
+  .notice {
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    background: var(--accent-soft);
+    color: var(--ink);
+    word-break: keep-all;
+  }
+  .notice[data-kind="warn"] { background: var(--warn-soft); color: var(--warn); }
+
+  /* Lower panels */
+  .lower { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 760px) {
+    .lower { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 20px 20px;
+    display: grid;
+    gap: 18px;
+    min-width: 0;
+  }
+  .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .panel h2 { margin: 0; font: 600 1rem/1.3 var(--font-body); }
+
+  .field { display: grid; gap: 8px; min-width: 0; }
+  .field-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .field label { font-size: 13.5px; font-weight: 500; }
+  output {
+    font: 400 12.5px/1.4 var(--font-mono);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    font: 400 14.5px/1.3 var(--font-body);
+    color: var(--ink);
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  input[type="range"] { width: 100%; margin: 0; accent-color: var(--accent); }
+  select:focus-visible, input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .voice-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    font-size: 12px;
+    line-height: 1.4;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--field);
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .tag.good { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+  .warnline { margin: 0; font-size: 13px; color: var(--warn); word-break: keep-all; }
+
+  .switch {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    cursor: pointer;
+  }
+  .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+  .switch-track {
+    position: relative;
+    width: 38px; height: 22px;
+    margin-top: 1px;
+    border-radius: 999px;
+    background: var(--line);
+    transition: background-color 0.2s;
+  }
+  .switch-track::after {
+    content: "";
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--knob);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s;
+  }
+  .switch input:checked + .switch-track { background: var(--accent); }
+  .switch input:checked + .switch-track::after { transform: translateX(16px); }
+  .switch input:focus-visible + .switch-track { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .switch:has(input:disabled) { opacity: 0.5; cursor: default; }
+  .switch-text { display: grid; gap: 2px; }
+  .switch-text strong { font-size: 14px; font-weight: 500; }
+  .switch-text small { font-size: 13px; line-height: 1.55; color: var(--muted); word-break: keep-all; }
+
+  .tip {
+    margin: 0;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--muted);
+    word-break: keep-all;
+  }
+  .tip strong { color: var(--ink); font-weight: 500; }
+
+  .link-btn {
+    padding: 4px 2px;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font: 500 13px/1 var(--font-body);
+    cursor: pointer;
+  }
+  .link-btn:hover { color: var(--accent); }
+
+  .takes { list-style: none; margin: 0; padding: 0; display: grid; }
+  .take {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: start;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+  }
+  .take:first-child { border-top: none; padding-top: 0; }
+  .take:last-child { padding-bottom: 0; }
+  .take-no {
+    padding-top: 3px;
+    font: 500 12px/1.4 var(--font-mono);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .take-body { display: grid; gap: 2px; min-width: 0; }
+  .take-text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+  .take-meta { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .take-actions { display: flex; gap: 6px; }
+  .icon-btn {
+    width: 34px; height: 34px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .empty { margin: 0; font-size: 14px; color: var(--muted); word-break: keep-all; }
+
+  /* Typecast panel */
+  .tc-panel { grid-column: 1 / -1; }
+  .engine { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .engine-opt { position: relative; min-width: 0; cursor: pointer; }
+  .engine-opt input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+  .engine-opt > span {
+    display: grid;
+    gap: 2px;
+    height: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+  .engine-opt strong { font-size: 14px; font-weight: 600; }
+  .engine-opt small { font-size: 12.5px; color: var(--muted); word-break: keep-all; }
+  .engine-opt:hover > span { border-color: var(--muted); }
+  .engine-opt input:checked + span { border-color: var(--accent); background: var(--accent-soft); }
+  .engine-opt input:checked + span strong { color: var(--accent); }
+  .engine-opt input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .tc-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  @media (min-width: 760px) { .tc-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+  .tc-side { display: grid; gap: 12px; align-content: start; min-width: 0; }
+  .tc-status { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .tc-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+  .tc-status[data-state="ready"] { color: var(--ok); }
+  .tc-status[data-state="ready"] .tc-dot { background: var(--ok); }
+  .tc-status[data-state="checking"] .tc-dot { background: var(--accent); }
+  .tc-status[data-state="needkey"], .tc-status[data-state="nohost"], .tc-status[data-state="error"] { color: var(--warn); }
+  .tc-status[data-state="needkey"] .tc-dot, .tc-status[data-state="nohost"] .tc-dot, .tc-status[data-state="error"] .tc-dot { background: var(--warn); }
+  .tc-msg { margin: 0; font-size: 13.5px; line-height: 1.6; word-break: keep-all; }
+  .tc-steps { margin: 0; padding-left: 1.25em; display: grid; gap: 4px; font-size: 13px; line-height: 1.6; color: var(--muted); word-break: keep-all; }
+  .tc-note { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--muted); word-break: keep-all; }
+  .btn-small {
+    justify-self: start;
+    padding: 9px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    font: 600 13px/1 var(--font-body);
+    cursor: pointer;
+  }
+  .btn-small:hover { background: var(--accent-soft); }
+  code {
+    font: 400 0.9em/1 var(--font-mono);
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    background: var(--field);
+    color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+  input[type="search"] {
+    width: 100%;
+    padding: 10px 12px;
+    font: 400 14.5px/1.3 var(--font-body);
+    color: var(--ink);
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  input[type="search"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  select:disabled, input[type="search"]:disabled { opacity: 0.6; }
+
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (max-width: 480px) {
+    .page { padding-block: 24px 40px; }
+    .booth { padding: 16px; }
+    .panel { padding: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lamp.paused .lamp-dot { animation: none; opacity: 0.5; }
+    * { transition: none !important; }
+  }
+</style>
+<style>
+  /* 진진가: the five claim cards and the question box sit above the booth as a flat panel,
+     so the booth stays the one raised card. Everything comes from the page's tokens. */
+  .jj {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 20px 20px;
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+  }
+  .jj-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 12px; }
+  .jj-title { display: grid; gap: 2px; min-width: 0; }
+  .jj-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .jj-title h2 { margin: 0; font: 700 1.375rem/1.2 var(--font-display); letter-spacing: -0.01em; text-wrap: balance; }
+  .jj-title p { margin: 0; font-size: 13.5px; color: var(--muted); word-break: keep-all; }
+
+  .jj-cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+  .jj-card {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    min-width: 0;
+    padding: 12px 12px 13px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--ink);
+    font: 500 14.5px/1.45 var(--font-body);
+    text-align: left;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+  }
+  .jj-card:hover { border-color: var(--muted); }
+  .jj-card[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .jj-no { font: 500 12px/1 var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .jj-card[aria-pressed="true"] .jj-no { color: var(--accent); }
+  @media (max-width: 700px) {
+    .jj-cards { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+    .jj-card { grid-template-columns: 1.5em minmax(0, 1fr); align-items: baseline; padding: 10px 12px; }
+  }
+
+  .jj-form { display: grid; gap: 8px; min-width: 0; }
+  .jj-ask { display: flex; flex-wrap: wrap; gap: 8px; }
+  #jjQ {
+    flex: 1 1 260px;
+    min-width: 0;
+    padding: 12px 14px;
+    font: 400 1rem/1.4 var(--font-body);
+    color: var(--ink);
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  #jjQ::placeholder { color: var(--muted); }
+  #jjQ:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .jj-ask .btn-primary { flex: 0 0 auto; }
+
+  .jj-suggest { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .jj-hint { margin: 0; font-size: 13px; color: var(--muted); word-break: keep-all; }
+  .jj-status { margin: 0; min-height: 1.6em; font-size: 13px; color: var(--muted); word-break: keep-all; }
+  .jj-status[data-kind="warn"] { color: var(--warn); }
+
+  .jj-log-wrap { padding-top: 12px; border-top: 1px solid var(--line); }
+  .jj-log-wrap > summary { width: fit-content; cursor: pointer; }
+  .jj-log-wrap > summary:hover { color: var(--ink); }
+  .jj-log-wrap > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .jj-log-body { display: grid; gap: 10px; justify-items: start; margin-top: 12px; }
+  .jj-log { width: 100%; list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .jj-entry { display: grid; grid-template-columns: 2.6em minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+  .jj-tag { padding-top: 2px; font: 500 12px/1.4 var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .jj-entry-body { display: grid; gap: 2px; min-width: 0; }
+  .jj-q { margin: 0; font-size: 14px; font-weight: 500; word-break: keep-all; overflow-wrap: anywhere; }
+  .jj-a { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--muted); word-break: keep-all; overflow-wrap: anywhere; }
+
+  /* 자동 읽기 toggle, right after the 대본 label; the meter keeps the right edge or wraps below on phones */
+  .booth-head { flex-wrap: wrap; row-gap: 6px; }
+  .booth-head .jj-auto { margin-right: auto; }
+  .jj-auto {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px 5px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font: 500 12.5px/1 var(--font-body);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .jj-auto:hover { border-color: var(--muted); }
+  .jj-auto-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); transition: background-color 0.15s; }
+  .jj-auto[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); }
+  .jj-auto[aria-pressed="true"] .jj-auto-dot { background: var(--accent); }
+
+  /* 내 목소리: pick, record or upload the reader's own voice; shown only with that tone */
+  .mine { display: grid; gap: 12px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--field); min-width: 0; }
+  .mine-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .mine-row label { font-size: 13.5px; font-weight: 500; }
+  .mine-row select { flex: 1 1 200px; width: auto; min-width: 0; background: var(--surface); }
+  .mine-add > summary { width: fit-content; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--accent); }
+  .mine-add > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .mine-body { display: grid; gap: 10px; margin-top: 10px; }
+  .mine-body p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--muted); word-break: keep-all; }
+  .mine-line { margin: 0; padding: 10px 12px; border-left: 3px solid var(--accent); border-radius: 6px; background: var(--surface); font-size: 14.5px; line-height: 1.7; word-break: keep-all; }
+  #mineName { flex: 1 1 160px; min-width: 0; padding: 9px 12px; font: 400 14.5px/1.3 var(--font-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  #mineName:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .mine-rec[aria-pressed="true"] { border-color: var(--onair); color: var(--onair); background: var(--onair-soft); }
+  .mine-file { font-size: 13px; color: var(--muted); }
+  .mine-file input { max-width: 100%; font-size: 13px; }
+  #minePreview { width: 100%; max-width: 420px; height: 36px; }
+  .mine-msg { min-height: 1.4em; }
+  .mine-msg[data-kind="warn"] { color: var(--warn); }
+  .mine-msg[data-kind="ok"] { color: var(--ok); }
+</style>
+
+<div class="page">
+  <header class="masthead">
+    <div class="brand">
+      <h1>낭독 부스</h1>
+      <p class="lede">문장을 쓰고 읽기를 누르면, AI 목소리가 사람이 말하듯 소리 내어 읽어 드려요.</p>
+    </div>
+    <div class="lamp" id="lamp" aria-hidden="true"><span class="lamp-dot"></span>ON AIR</div>
+  </header>
+
+  <section class="jj" aria-labelledby="jj-h">
+    <div class="jj-head">
+      <div class="jj-title">
+        <h2 id="jj-h">진진가</h2>
+        <p>다섯 가지 중 거짓 두 개를 찾아보세요. 궁금한 항목에 질문하면 제가 대답해요.</p>
+      </div>
+      <div class="jj-tools">
+        <button id="jjEcho" class="jj-auto" type="button" aria-pressed="true"><span class="jj-auto-dot" aria-hidden="true"></span><span>질문 먼저 읽기 켬</span></button>
+        <button id="jjIntro" class="btn-small" type="button">항목 소개 읽기</button>
+      </div>
+    </div>
+
+    <div class="jj-cards" id="jjCards" role="group" aria-label="다섯 항목"></div>
+
+    <form class="jj-form" id="jjForm" autocomplete="off">
+      <label class="eyebrow" for="jjQ">질문</label>
+      <div class="jj-ask">
+        <input type="text" id="jjQ" enterkeyhint="send" placeholder="질문을 입력하세요. 예: 지수: 고양이 이름이 뭐예요?">
+        <button id="jjAsk" class="btn-primary" type="submit">답변 듣기</button>
+      </div>
+    </form>
+
+    <div class="jj-suggest" id="jjSuggest"></div>
+    <p class="jj-status" id="jjStatus" aria-live="polite"></p>
+
+    <details class="jj-log-wrap" id="jjLogWrap" hidden>
+      <summary class="eyebrow" id="jjLogSum">지난 질문</summary>
+      <div class="jj-log-body">
+        <ol class="jj-log" id="jjLog"></ol>
+        <button id="jjLogClear" class="link-btn" type="button">목록 비우기</button>
+      </div>
+    </details>
+  </section>
+
+  <section class="booth" aria-labelledby="script-label">
+    <div class="booth-head">
+      <label id="script-label" class="eyebrow" for="script">대본</label>
+      <button id="jjAuto" class="jj-auto" type="button" aria-pressed="true"><span class="jj-auto-dot" aria-hidden="true"></span><span>자동 읽기 켬</span></button>
+      <span class="meter" id="meter">0자</span>
+    </div>
+
+    <div class="stage">
+      <textarea id="script" spellcheck="false" placeholder="여기에 읽어 줄 문장을 적어 주세요."></textarea>
+      <div id="prompter" class="prompter" hidden></div>
+    </div>
+
+    <div class="examples" id="examples">
+      <span class="examples-label">예시</span>
+    </div>
+
+    <fieldset class="tones">
+      <legend class="eyebrow">음성 톤</legend>
+      <div class="tone-grid">
+        <label class="tone">
+          <input type="radio" name="tone" id="tone-natural" value="natural" checked>
+          <span class="tone-card">
+            <svg class="tone-wave" viewBox="0 0 48 16" aria-hidden="true"><path d="M1 8 C3 3 5 3 7 8 S10 13 12 8 S15 4 17 8 S20 11 22 8 S25 1 28 8 S32 13 34 8 S37 5 39 8 S42 10 44 8 L47 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="tone-name">기본</span>
+            <span class="tone-desc">자연스러운 목소리</span>
+          </span>
+        </label>
+        <label class="tone">
+          <input type="radio" name="tone" id="tone-female" value="female">
+          <span class="tone-card">
+            <svg class="tone-wave" viewBox="0 0 48 16" aria-hidden="true"><path d="M1 8 Q5 3 9 8 T17 8 T25 8 T33 8 T41 8 L47 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="tone-name">여성</span>
+            <span class="tone-desc">차분한 톤</span>
+          </span>
+        </label>
+        <label class="tone">
+          <input type="radio" name="tone" id="tone-jeolla" value="jeolla">
+          <span class="tone-card">
+            <svg class="tone-wave" viewBox="0 0 48 16" aria-hidden="true"><path d="M1 8 C2.5 3 4 3 5 8 S7 14 8.5 8 S11 1 13 8 S15.5 12 17 8 S20 4 21.5 8 L23 8 C24.5 2 26.5 2 28 8 S30.5 15 32.5 8 S35.5 3 37 8 S40 13 42 8 S45 5 47 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="tone-name">사투리</span>
+            <span class="tone-desc">녹음 목소리</span>
+          </span>
+        </label>
+        <label class="tone">
+          <input type="radio" name="tone" id="tone-mine" value="mine">
+          <span class="tone-card">
+            <svg class="tone-wave" viewBox="0 0 48 16" aria-hidden="true"><path d="M1 8 C4 4 7 4 10 8 S16 12 19 8 S25 3 28 8 S34 13 37 8 S43 5 47 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="tone-name">내 목소리</span>
+            <span class="tone-desc">녹음한 목소리</span>
+          </span>
+        </label>
+      </div>
+      <p class="tone-note" id="toneNote" aria-live="polite">목소리를 불러오는 중이에요.</p>
+    </fieldset>
+
+    <div class="mine" id="mineBox" hidden>
+      <div class="mine-row">
+        <label for="mineVoice">읽을 목소리</label>
+        <select id="mineVoice"><option value="">목소리를 불러오는 중…</option></select>
+        <button id="mineDel" class="link-btn" type="button" hidden>이 목소리 지우기</button>
+      </div>
+      <details class="mine-add" id="mineAdd">
+        <summary>내 목소리 새로 등록하기</summary>
+        <div class="mine-body">
+          <p>조용한 곳에서 아래 문장을 평소 말투로 또박또박 읽어 주세요. 10~20초면 충분해요. 블루투스 이어폰 마이크보다 노트북 내장 마이크가 더 잘 닮아요.</p>
+          <p class="mine-line">안녕하세요, 저는 오늘 여러분과 함께 재미있는 게임을 진행할 사람이에요. 질문은 채팅으로 편하게 남겨 주시고, 정답은 마지막에 같이 확인해 볼게요.</p>
+          <div class="mine-row">
+            <input type="text" id="mineName" maxlength="20" placeholder="목소리 이름 (예: 지수)" autocomplete="off">
+            <button id="mineRec" class="btn-small mine-rec" type="button" aria-pressed="false">녹음 시작</button>
+          </div>
+          <label class="mine-file">또는 녹음 파일 올리기 (m4a, mp3, wav) <input type="file" id="mineFile" accept="audio/*"></label>
+          <audio id="minePreview" controls hidden></audio>
+          <div class="mine-row">
+            <button id="mineSave" class="btn-small" type="button" disabled>이 녹음으로 등록하기</button>
+          </div>
+          <p class="mine-msg" id="mineMsg" aria-live="polite"></p>
+          <p>녹음은 이 Mac의 음성 서버 폴더에만 저장돼요. 다른 사람의 목소리는 본인 동의를 받고 등록해 주세요.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="transport">
+      <button id="playBtn" class="btn-primary" type="button">
+        <span class="ico" id="icoPlay"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5.6v12.8a1 1 0 0 0 1.52.85l10.3-6.4a1 1 0 0 0 0-1.7L9.52 4.75A1 1 0 0 0 8 5.6z" fill="currentColor"/></svg></span>
+        <span class="ico" id="icoPause" hidden><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="6.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/></svg></span>
+        <span id="playLabel">읽기</span>
+      </button>
+      <button id="stopBtn" class="btn-ghost" type="button" disabled>
+        <span class="ico"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg></span>
+        정지
+      </button>
+      <canvas id="wave" aria-hidden="true"></canvas>
+    </div>
+
+    <div class="status-row">
+      <span id="status" aria-live="polite">대기 중</span>
+      <span class="hint" id="hint" data-mode="keys"><kbd>⌘</kbd> / <kbd>Ctrl</kbd> + <kbd>Enter</kbd> 읽기 · <kbd>Esc</kbd> 정지</span>
+    </div>
+
+    <p id="notice" class="notice" hidden></p>
+  </section>
+
+  <div class="lower">
+    <section class="panel tc-panel" aria-labelledby="tc-h">
+      <div class="panel-head">
+        <h2 id="tc-h">녹음 목소리</h2>
+        <span class="tc-status" id="tcStatus" data-state="idle" aria-live="polite"><span class="tc-dot"></span><span id="tcStatusText">연결 안 됨</span></span>
+      </div>
+      <div class="engine" role="radiogroup" aria-label="목소리를 만드는 곳">
+        <label class="engine-opt"><input type="radio" name="tcProvider" id="tcProvLocal" value="local" checked><span><strong>내 Mac에서 복제</strong><small>녹음 속 인물 목소리 · 무료</small></span></label>
+        <label class="engine-opt"><input type="radio" name="tcProvider" id="tcProvTypecast" value="typecast"><span><strong>Typecast</strong><small>원래 캐릭터 · API 키 필요</small></span></label>
+      </div>
+      <div class="tc-grid">
+        <div class="tc-side">
+          <p class="tc-msg" id="tcMsg">사투리 톤을 폴더 녹음 속 인물의 목소리로 읽어요.</p>
+          <ol class="tc-steps" id="tcSteps"></ol>
+          <button id="tcConnect" class="btn-small" type="button">연결하기</button>
+          <p class="tc-note" id="tcCredit"></p>
+        </div>
+        <div class="tc-side">
+          <div class="field">
+            <label for="tcSearch">목소리</label>
+            <input type="search" id="tcSearch" placeholder="이름으로 찾기" autocomplete="off" disabled>
+            <select id="tcVoice" disabled><option value="">연결하면 목록이 나와요</option></select>
+          </div>
+          <div class="field">
+            <label for="tcEmotion">감정</label>
+            <select id="tcEmotion" disabled><option value="smart">자동 (앞뒤 문장에 맞게)</option></select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="voice-h">
+      <h2 id="voice-h">목소리</h2>
+
+      <div class="field">
+        <label for="voice">음성</label>
+        <select id="voice" disabled>
+          <option>목소리를 불러오는 중…</option>
+        </select>
+        <div class="voice-meta" id="voiceMeta"></div>
+        <p class="warnline" id="voiceWarn" hidden></p>
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label for="rate">말하기 속도</label>
+          <output id="rateOut" for="rate">1.00× · 약 300음절/분</output>
+        </div>
+        <input type="range" id="rate" min="0.6" max="1.6" step="0.05" value="1">
+      </div>
+
+      <div class="field">
+        <div class="field-head">
+          <label for="pitch">목소리 높이</label>
+          <output id="pitchOut" for="pitch">기본</output>
+        </div>
+        <input type="range" id="pitch" min="0.3" max="1.6" step="0.05" value="1">
+      </div>
+
+      <label class="switch" for="natural">
+        <input type="checkbox" id="natural" checked>
+        <span class="switch-track" aria-hidden="true"></span>
+        <span class="switch-text">
+          <strong>자연스러운 억양과 쉼</strong>
+          <small>문장마다 억양과 빠르기를 조금씩 바꾸고, 문장 사이에 숨 고르는 쉼을 넣어요. 물음표로 끝나는 문장은 끝을 살짝 올려 읽어요.</small>
+        </span>
+      </label>
+
+      <p class="tip">목소리는 지금 쓰는 기기와 브라우저에 들어 있는 음성을 사용해요. <strong>Microsoft Edge</strong>에서는 SunHi·InJoon 같은 ‘Natural’ 음성이, <strong>Chrome</strong>에서는 Google 한국어 음성이 가장 사람에 가깝게 들려요. Mac에서는 시스템 설정의 손쉬운 사용에서 ‘유나’의 향상된 음성을 내려받을 수 있어요.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="takes-h">
+      <div class="panel-head">
+        <h2 id="takes-h">최근 테이크</h2>
+        <button id="clearTakes" class="link-btn" type="button" hidden>목록 비우기</button>
+      </div>
+      <ol id="takes" class="takes"></ol>
+      <p id="takesEmpty" class="empty">아직 테이크가 없어요. 대본을 읽을 때마다 여기에 차례로 쌓이고, 다시 들을 수 있어요.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const scriptEl = $('script'), prompter = $('prompter'), meter = $('meter');
+  const playBtn = $('playBtn'), playLabel = $('playLabel'), icoPlay = $('icoPlay'), icoPause = $('icoPause');
+  const stopBtn = $('stopBtn'), statusEl = $('status'), hintEl = $('hint'), notice = $('notice'), lamp = $('lamp');
+  const voiceSel = $('voice'), voiceMeta = $('voiceMeta'), voiceWarn = $('voiceWarn');
+  const rateEl = $('rate'), rateOut = $('rateOut'), pitchEl = $('pitch'), pitchOut = $('pitchOut'), naturalEl = $('natural');
+  const takesEl = $('takes'), takesEmpty = $('takesEmpty'), clearBtn = $('clearTakes'), canvas = $('wave');
+  const toneNote = $('toneNote'), toneInputs = Array.from(document.querySelectorAll('input[name="tone"]'));
+  const tcStatus = $('tcStatus'), tcStatusText = $('tcStatusText'), tcMsg = $('tcMsg'), tcSteps = $('tcSteps'), tcConnect = $('tcConnect');
+  const tcCredit = $('tcCredit'), tcSearch = $('tcSearch'), tcVoiceSel = $('tcVoice'), tcEmotionSel = $('tcEmotion');
+  const tcProviderInputs = Array.from(document.querySelectorAll('input[name="tcProvider"]'));
+
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem('booth:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem('booth:' + k, JSON.stringify(v)); } catch (e) {} }
+  };
+
+  const SAMPLE = '안녕하세요, 낭독 부스에 오신 걸 환영해요. 여기에 문장을 적고 읽기 버튼을 누르면, AI 목소리가 사람처럼 읽어 드려요. 질문도 자연스럽게 읽을 수 있을까요? 직접 들어 보세요!';
+  const EXAMPLES = [
+    ['인사', '안녕하세요. 오늘 하루는 어떠셨어요? 저는 덕분에 아주 즐거운 하루였어요.'],
+    ['안내 방송', '잠시 후 열차가 도착합니다. 안전을 위해 노란 선 밖으로 한 걸음 물러서 주시기 바랍니다.'],
+    ['일기예보', '오늘 서울은 대체로 맑겠고, 낮 최고 기온은 18도로 어제보다 조금 높겠습니다. 다만 저녁부터는 바람이 강해지니, 외출하실 때 겉옷을 챙기세요.'],
+    ['동화', '옛날 옛적, 깊은 산속에 작은 오두막이 하나 있었어요.\n그곳에는 마음씨 고운 할머니와 장난꾸러기 고양이가 함께 살고 있었답니다.'],
+    ['창수 대사', '아 죽겠네. 내가 좋은 데 싹 알아놨으니까 가기만 해요. 저쪽에 가까운 데서 크리스마스 트리도 보고요, 정말 재밌겠네!']
+  ];
+
+  const synth = 'speechSynthesis' in window ? window.speechSynthesis : null;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  const st = { status: 'idle', segs: [], idx: 0, run: 0, timer: null, pendingNext: false, current: null };
+  let ordered = [];
+  let voice = null;
+  let tone = 'natural';
+
+  // Tones shown in the booth. 남성 and 로봇 were removed (no natural male Korean voice on this Mac).
+  const OFFERED = ['natural', 'female', 'jeolla', 'mine'];
+  // Starting rate/pitch for each tone; the sliders fine-tune from here.
+  const TONES = {
+    natural: { rate: 1, pitch: 1 },
+    female: { rate: 0.9, pitch: 0.95 },
+    male: { rate: 0.95, pitch: 0.85, alt: 0.6 },
+    robot: { rate: 0.85, pitch: 0.5 },
+    // Measured from the dialect recording: ~1.25x the standard take's pace, much higher and livelier pitch.
+    jeolla: { rate: 1.2, pitch: 1.25, alt: 1.05 },
+    // 내 목소리: the user's own recording, cloned on this Mac and read as written (no dialect).
+    mine: { rate: 1, pitch: 1 }
+  };
+  // How much each tone varies between sentences, and how long it pauses.
+  const STYLE = {
+    natural: { rj: 0.035, pj: 0.04, q: 0.07, exR: 1.04, exP: 0.04, gap: 1 },
+    female: { rj: 0.02, pj: 0.025, q: 0.05, exR: 1, exP: 0.02, gap: 1.3 },
+    male: { rj: 0.03, pj: 0.025, q: 0.05, exR: 1.02, exP: 0.02, gap: 1.15 },
+    jeolla: { rj: 0.05, pj: 0.08, q: 0.04, exR: 1.05, exP: 0.06, gap: 0.9 }
+  };
+  const GAPS = { sent: 340, line: 460, para: 780, comma: 150, end: 0 };
+  const ROBOT_GAPS = { word: 80, comma: 220, sent: 420, line: 480, para: 760, end: 0 };
+
+  /* ---------- Script splitting ---------- */
+  const END = '.!?。！？…';
+  const CLOSE = '"\'”’」』)]';
+
+  function splitScript(text, limit) {
+    const segs = [];
+    let start = 0, i = 0;
+    const push = (end, brk) => {
+      const raw = text.slice(start, end);
+      const lead = raw.length - raw.trimStart().length;
+      const body = raw.trim();
+      if (body && /[\p{L}\p{N}]/u.test(body)) {
+        segs.push({ text: body, start: start + lead, end: start + lead + body.length, brk });
+      } else if (segs.length && brk === 'para') {
+        segs[segs.length - 1].brk = 'para';
+      }
+    };
+    while (i < text.length) {
+      const ch = text[i];
+      if (ch === '\n') {
+        let j = i;
+        while (j < text.length && /\s/.test(text[j])) j++;
+        const lines = (text.slice(i, j).match(/\n/g) || []).length;
+        push(i, lines > 1 ? 'para' : 'line');
+        start = i = j;
+        continue;
+      }
+      if (END.includes(ch)) {
+        let j = i + 1;
+        while (j < text.length && (END.includes(text[j]) || CLOSE.includes(text[j]))) j++;
+        // keep decimals such as 3.5 together
+        if (ch === '.' && /\d/.test(text[i - 1] || '') && /\d/.test(text[j] || '')) { i = j; continue; }
+        push(j, 'sent');
+        start = i = j;
+        continue;
+      }
+      i++;
+    }
+    push(text.length, 'end');
+    return segs.flatMap((s) => splitLong(s, limit || 160));
+  }
+
+  // Long sentences are split at commas so the browser engine never stalls mid-utterance
+  // (and so each Typecast request stays small).
+  function splitLong(seg, LIMIT) {
+    if (seg.text.length <= LIMIT) return [seg];
+    const out = [];
+    let s = seg.text, offset = seg.start;
+    while (s.length > LIMIT) {
+      let cut = Math.max(s.lastIndexOf(',', LIMIT), s.lastIndexOf('，', LIMIT), s.lastIndexOf('、', LIMIT));
+      if (cut < 40) cut = s.lastIndexOf(' ', LIMIT);
+      cut = cut < 40 ? LIMIT : cut + 1;
+      const piece = s.slice(0, cut).trimEnd();
+      out.push({ text: piece, start: offset, end: offset + piece.length, brk: 'comma' });
+      const rest = s.slice(cut);
+      const lead = rest.length - rest.trimStart().length;
+      offset += cut + lead;
+      s = rest.trimStart();
+    }
+    if (s) out.push({ text: s, start: offset, end: offset + s.length, brk: seg.brk });
+    return out;
+  }
+
+  // The dialect tone reads comma phrases separately so each phrase can take its own pitch.
+  function splitPhrases(seg) {
+    const parts = [];
+    const re = /[^,，]+[,，]?/g;
+    let m;
+    while ((m = re.exec(seg.text))) {
+      const lead = m[0].length - m[0].trimStart().length;
+      const body = m[0].trim();
+      if (!body || !/[\p{L}\p{N}]/u.test(body)) continue;
+      const start = seg.start + m.index + lead;
+      parts.push({ text: body, start, end: start + body.length, brk: 'comma' });
+    }
+    if (!parts.length) return [seg];
+    parts[parts.length - 1].brk = seg.brk;
+    parts.forEach((p, k) => { p.pos = k; p.of = parts.length; });
+    return parts;
+  }
+
+  // The robot tone reads one word (eojeol) at a time for a mechanical cadence.
+  function buildSegs(text) {
+    const segs = splitScript(text);
+    if (tone === 'jeolla') return segs.flatMap(splitPhrases);
+    if (tone !== 'robot') return segs;
+    return segs.flatMap((seg) => {
+      const words = Array.from(seg.text.matchAll(/\S+/g)).filter((m) => /[\p{L}\p{N}]/u.test(m[0]));
+      return words.map((m, k) => ({
+        text: m[0],
+        start: seg.start + m.index,
+        end: seg.start + m.index + m[0].length,
+        brk: k === words.length - 1 ? seg.brk : 'word'
+      }));
+    });
+  }
+
+  /* ---------- Prosody ---------- */
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  const jitter = (n) => (Math.random() * 2 - 1) * n;
+
+  function prosody(seg) {
+    const rate = +rateEl.value, pitch = +pitchEl.value;
+    if (tone === 'robot') return { rate, pitch, gap: ROBOT_GAPS[seg.brk] || 0 };
+    if (!naturalEl.checked) return { rate, pitch, gap: 0 };
+    const s = STYLE[tone] || STYLE.natural;
+    const t = seg.text;
+    const question = /[?？]["'”’」』)\]]*$/.test(t);
+    const exclaim = /[!！]["'”’」』)\]]*$/.test(t);
+    let r = rate * (1 + jitter(s.rj));
+    let p = pitch * (1 + jitter(s.pj));
+    if (question) p += s.q;
+    if (exclaim) { r *= s.exR; p += s.exP; }
+    // Phrase melody: start a sentence high and let the last phrase settle lower.
+    if (seg.of > 1) p += seg.pos === 0 ? 0.06 : seg.pos === seg.of - 1 ? -0.04 : 0.02;
+    if (t.length < 14) r *= 0.96;
+    const base = (GAPS[seg.brk] || 0) * s.gap;
+    return { rate: clamp(r, 0.5, 2), pitch: clamp(p, 0.1, 2), gap: Math.max(0, base + jitter(90 * s.gap)) };
+  }
+
+  /* ---------- Playback ---------- */
+  function play(fromOffset) {
+    if (tone === 'mine' && tc.mcp && !mine.id) {
+      showNotice('읽을 목소리가 없어요. 아래에서 내 목소리를 먼저 등록해 주세요.', 'warn');
+      $('mineAdd').open = true;
+      return;
+    }
+    if (tone === 'mine' && !tc.mcp) {
+      showNotice('내 목소리는 이 페이지를 Claude 데스크톱 앱에서 열었을 때만 읽을 수 있어요.', 'warn');
+      return;
+    }
+    const engine = tcActive() ? 'tc' : 'web';
+    if (engine === 'web' && !synth) return;
+    const text = scriptEl.value;
+    const spoken = tone === 'jeolla' ? toJeolla(text).text : text;
+    // Typecast reads whole sentences (with context) for the most natural delivery.
+    const segs = engine === 'tc' ? splitScript(spoken, 90) : buildSegs(spoken);
+    if (!segs.length) {
+      showNotice('읽을 문장을 먼저 적어 주세요.', 'info');
+      scriptEl.focus();
+      return;
+    }
+    hideNotice();
+    const busy = (synth && (synth.speaking || synth.pending)) || st.status !== 'idle';
+    halt();
+    st.engine = engine;
+    st.segs = segs;
+    st.idx = fromOffset > 0 ? Math.max(0, segs.findIndex((s) => s.end > fromOffset)) : 0;
+    buildPrompter(spoken, segs);
+    showPrompter(true);
+    setStatus('speaking');
+    addTake(text);
+    if (engine === 'tc') unlockAudio();
+    const run = st.run;
+    if (busy) setTimeout(() => advance(run), 90);
+    else advance(run);
+  }
+
+  function advance(run) {
+    if (st.engine === 'tc') tcNext(run);
+    else speakNext(run);
+  }
+
+  function speakNext(run) {
+    if (run !== st.run) return;
+    if (st.idx >= st.segs.length) return finish(run);
+    const i = st.idx, seg = st.segs[i];
+    const p = prosody(seg);
+    const u = new SpeechSynthesisUtterance(seg.text);
+    if (voice) { u.voice = voice; u.lang = voice.lang; } else { u.lang = 'ko-KR'; }
+    u.rate = p.rate;
+    u.pitch = p.pitch;
+    u.volume = 1;
+    u.onstart = () => {
+      if (run !== st.run) return;
+      markSeg(i);
+      wave.pulse(0.8);
+    };
+    u.onboundary = (e) => {
+      if (run !== st.run || (e.name && e.name !== 'word')) return;
+      markWord(seg, e.charIndex, e.charLength);
+      wave.boundary();
+    };
+    u.onend = () => {
+      if (run !== st.run) return;
+      st.idx = i + 1;
+      if (st.idx >= st.segs.length) return finish(run);
+      if (st.status === 'paused') { st.pendingNext = true; return; }
+      st.timer = setTimeout(() => {
+        st.timer = null;
+        if (run !== st.run) return;
+        if (st.status === 'paused') { st.pendingNext = true; return; }
+        speakNext(run);
+      }, p.gap);
+    };
+    u.onerror = (e) => {
+      if (run !== st.run || e.error === 'interrupted' || e.error === 'canceled') return;
+      stop();
+      showNotice(errorText(e.error), 'warn');
+    };
+    st.current = u; // keep a reference so the utterance is not garbage-collected before it ends
+    markSeg(i);
+    synth.speak(u);
+  }
+
+  function pause() {
+    if (st.status !== 'speaking') return;
+    setStatus('paused');
+    if (st.timer) { clearTimeout(st.timer); st.timer = null; st.pendingNext = true; }
+    else if (st.engine === 'tc') { if (!tcAudio.paused) tcAudio.pause(); }
+    else synth.pause();
+  }
+
+  function resume() {
+    if (st.status !== 'paused') return;
+    setStatus('speaking');
+    if (st.pendingNext) { st.pendingNext = false; advance(st.run); }
+    else if (st.engine === 'tc') { if (!st.loading) tcAudio.play().catch(() => {}); }
+    else synth.resume();
+  }
+
+  function halt() {
+    st.run++;
+    clearTimeout(st.timer);
+    st.timer = null;
+    st.pendingNext = false;
+    st.loading = false;
+    st.prefetching = false;
+    tcAudio.onended = tcAudio.ontimeupdate = tcAudio.onerror = null;
+    if (!tcAudio.paused) tcAudio.pause();
+    if (synth) {
+      synth.cancel();
+      if (synth.paused) synth.resume();
+    }
+  }
+
+  function stop() {
+    halt();
+    setStatus('idle');
+    showPrompter(false);
+  }
+
+  function jumpTo(i) {
+    if (i < 0 || i >= st.segs.length) return;
+    halt();
+    st.idx = i;
+    setStatus('speaking');
+    markSeg(i);
+    const run = st.run;
+    setTimeout(() => advance(run), 90);
+  }
+
+  function finish(run) {
+    if (run !== st.run) return;
+    st.segs.forEach((s) => { clearWord(s); s.el.classList.remove('active'); s.el.classList.add('done'); });
+    setStatus('idle');
+    statusEl.textContent = '다 읽었어요';
+    setTimeout(() => { if (st.status === 'idle' && run === st.run) showPrompter(false); }, 800);
+  }
+
+  function errorText(code) {
+    switch (code) {
+      case 'not-allowed': return '브라우저가 소리 재생을 막았어요. 읽기 버튼을 한 번 더 눌러 주세요.';
+      case 'audio-busy': return '다른 앱이 오디오를 쓰고 있어요. 잠시 뒤에 다시 읽어 주세요.';
+      case 'network': return '온라인 음성을 불러오지 못했어요. 인터넷 연결을 확인하거나 기기에 내장된 목소리를 골라 주세요.';
+      case 'synthesis-unavailable':
+      case 'voice-unavailable':
+      case 'language-unavailable': return '이 목소리는 지금 쓸 수 없어요. 다른 목소리를 골라 다시 읽어 주세요.';
+      default: return `음성을 재생하지 못했어요 (${code || '알 수 없는 오류'}). 다른 목소리로 다시 읽어 주세요.`;
+    }
+  }
+
+  /* ---------- Prompter (read-along view) ---------- */
+  function buildPrompter(text, segs) {
+    prompter.textContent = '';
+    let pos = 0;
+    segs.forEach((seg, i) => {
+      if (seg.start > pos) prompter.append(text.slice(pos, seg.start));
+      const span = document.createElement('span');
+      span.className = 'seg';
+      span.dataset.i = i;
+      span.tabIndex = 0;
+      span.setAttribute('role', 'button');
+      span.setAttribute('aria-label', `여기부터 읽기: ${seg.text}`);
+      span.textContent = seg.text;
+      prompter.append(span);
+      seg.el = span;
+      pos = seg.end;
+    });
+    if (pos < text.length) prompter.append(text.slice(pos));
+  }
+
+  function showPrompter(on) {
+    if (on) prompter.style.height = Math.max(scriptEl.offsetHeight, 160) + 'px';
+    scriptEl.hidden = on;
+    prompter.hidden = !on;
+    hintEl.dataset.mode = on ? 'jump' : 'keys';
+    hintEl.innerHTML = on
+      ? '읽고 있는 글을 누르면 그 부분부터 다시 읽어요'
+      : '<kbd>⌘</kbd> / <kbd>Ctrl</kbd> + <kbd>Enter</kbd> 읽기 · <kbd>Esc</kbd> 정지';
+    if (!on) prompter.scrollTop = 0;
+  }
+
+  function clearWord(seg) {
+    if (seg.marked) { seg.el.textContent = seg.text; seg.marked = false; }
+  }
+
+  function markSeg(i) {
+    st.segs.forEach((s, j) => {
+      if (j !== i) clearWord(s);
+      s.el.classList.toggle('done', j < i);
+      s.el.classList.toggle('active', j === i);
+    });
+    updateTransport();
+    const el = st.segs[i] && st.segs[i].el;
+    if (el) {
+      const top = el.offsetTop - prompter.clientHeight * 0.3;
+      prompter.scrollTo({ top: Math.max(0, top), behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    }
+  }
+
+  function markWord(seg, idx, len) {
+    const t = seg.text;
+    if (!seg.el || idx == null || idx >= t.length) return;
+    if (!len) {
+      const m = t.slice(idx).match(/^\S+/);
+      len = m ? m[0].length : 1;
+    }
+    const mark = document.createElement('mark');
+    mark.className = 'word';
+    mark.textContent = t.slice(idx, idx + len);
+    seg.el.textContent = '';
+    seg.el.append(t.slice(0, idx), mark, t.slice(idx + len));
+    seg.marked = true;
+  }
+
+  prompter.addEventListener('click', (e) => {
+    const el = e.target.closest('.seg');
+    if (el) jumpTo(+el.dataset.i);
+  });
+  prompter.addEventListener('keydown', (e) => {
+    const el = e.target.closest('.seg');
+    if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); jumpTo(+el.dataset.i); }
+  });
+
+  /* ---------- Status ---------- */
+  function setStatus(s) {
+    st.status = s;
+    lamp.classList.toggle('on', s === 'speaking');
+    lamp.classList.toggle('paused', s === 'paused');
+    updateTransport();
+    wave.wake();
+  }
+
+  function updateTransport() {
+    const s = st.status;
+    playLabel.textContent = s === 'speaking' ? '일시정지' : s === 'paused' ? '계속 읽기' : '읽기';
+    icoPlay.hidden = s === 'speaking';
+    icoPause.hidden = s !== 'speaking';
+    stopBtn.disabled = s === 'idle';
+    playBtn.disabled = !synth && !tcActive();
+    if (s === 'idle') statusEl.textContent = '대기 중';
+    else {
+      const n = st.segs.length, cur = Math.min(st.idx + 1, n);
+      const unit = st.engine === 'tc' ? '문장' : tone === 'robot' ? '마디' : tone === 'jeolla' ? '구절' : '문장';
+      const label = st.loading ? (curProv() === 'typecast' ? 'Typecast 목소리 만드는 중' : '복제 목소리 만드는 중') : s === 'paused' ? '일시정지' : '읽는 중';
+      statusEl.textContent = `${label} · ${cur} / ${n} ${unit}`;
+    }
+  }
+
+  function showNotice(msg, kind) {
+    notice.textContent = msg;
+    notice.dataset.kind = kind || 'info';
+    notice.hidden = false;
+  }
+  function hideNotice() { notice.hidden = true; }
+
+  /* ---------- Voices ---------- */
+  const langName = (() => {
+    try {
+      const dn = new Intl.DisplayNames(['ko'], { type: 'language' });
+      return (l) => { try { return dn.of(String(l).replace('_', '-')) || l; } catch (e) { return l; } };
+    } catch (e) { return (l) => l; }
+  })();
+  const isKo = (v) => /^ko/i.test(v.lang || '');
+  const NOVELTY = /^(Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Eddy|Flo|Grandma|Grandpa|Reed|Rocko|Sandy|Shelley)\b/;
+
+  function tier(v) {
+    const n = v.name || '';
+    if (/natural|neural|premium|프리미엄/i.test(n)) return 4;
+    if (/enhanced|향상|고품질/i.test(n)) return 3;
+    if (/google|online/i.test(n)) return 3;
+    if (NOVELTY.test(n)) return 0;
+    return 1;
+  }
+  const TIER_LABEL = { 4: '자연 음성', 3: '고품질', 1: '기본 음성', 0: '효과음 음성' };
+  const cleanName = (n) => n.replace(/^Microsoft\s+/, '').replace(/\s+-\s+[^-]+$/, '');
+
+  function loadVoices() {
+    if (!synth) return false;
+    const list = synth.getVoices();
+    if (!list.length) return false;
+    const ko = list.filter(isKo).sort((a, b) => tier(b) - tier(a) || Number(b.default) - Number(a.default) || a.name.localeCompare(b.name));
+    const other = list.filter((v) => !isKo(v)).sort((a, b) =>
+      String(a.lang).localeCompare(String(b.lang)) || tier(b) - tier(a) || a.name.localeCompare(b.name));
+    ordered = ko.concat(other);
+
+    voiceSel.textContent = '';
+    const group = (label, arr, offset) => {
+      if (!arr.length) return;
+      const g = document.createElement('optgroup');
+      g.label = label;
+      arr.forEach((v, k) => {
+        const o = document.createElement('option');
+        o.value = String(offset + k);
+        const t = tier(v);
+        o.textContent = `${cleanName(v.name)} · ${langName(v.lang)}${t >= 3 ? ' · ' + TIER_LABEL[t] : ''}`;
+        g.append(o);
+      });
+      voiceSel.append(g);
+    };
+    group(`한국어 (${ko.length})`, ko, 0);
+    group(`다른 언어 (${other.length})`, other, ko.length);
+    voiceSel.disabled = false;
+
+    const keep = voice ? voice.voiceURI : store.get('voice', null);
+    const pick = ordered.find((v) => v.voiceURI === keep) || pickToneVoice(tone) || list.find((v) => v.default) || ordered[0];
+    selectVoice(pick, false);
+    return true;
+  }
+
+  function selectVoice(v, remember) {
+    voice = v || null;
+    const i = ordered.indexOf(voice);
+    if (i >= 0) voiceSel.value = String(i);
+    if (remember && voice) store.set('voice', voice.voiceURI);
+    renderVoiceMeta();
+  }
+
+  function renderVoiceMeta() {
+    voiceMeta.textContent = '';
+    if (!voice) return;
+    const t = tier(voice);
+    const tag = (text, good) => {
+      const s = document.createElement('span');
+      s.className = 'tag' + (good ? ' good' : '');
+      s.textContent = text;
+      voiceMeta.append(s);
+    };
+    tag(TIER_LABEL[t], t >= 3);
+    tag(langName(voice.lang));
+    tag(voice.localService ? '기기 내장 · 오프라인 가능' : '온라인 음성 · 인터넷 필요');
+    checkLang();
+    renderToneNote();
+  }
+
+  /* ---------- Tones ---------- */
+  const FEMALE = /\bfemale\b|\bwoman\b|여성|yuna|유나|sora|sunhi|heami|seohyeon|jimin|yujin|soonbok|google\s*한국|^flo\b|^sandy\b|^shelley\b|^grandma\b/i;
+  const MALE = /\bmale\b|\bman\b|남성|injoon|hyunsu|bongjin|gookmin|minsu|^eddy\b|^reed\b|^rocko\b|^grandpa\b/i;
+  const gender = (v) => (FEMALE.test(v.name) ? 'f' : MALE.test(v.name) ? 'm' : '');
+
+  const rankMale = (v) => { const i = ['reed', 'eddy', 'rocko', 'grandpa'].findIndex((n) => v.name.toLowerCase().startsWith(n)); return i < 0 ? 9 : i; };
+
+  // Best voice for a tone: Korean first, already ordered from most to least natural.
+  function pickToneVoice(t) {
+    let pool = ordered.filter(isKo);
+    if (!pool.length) pool = ordered.slice();
+    const real = pool.filter((v) => tier(v) > 0);
+    const first = (arr) => arr[0] || null;
+    if (t === 'female') return first(real.filter((v) => gender(v) === 'f')) || first(real) || first(pool);
+    if (t === 'jeolla') return first(real.filter((v) => gender(v) === 'm')) || first(real) || first(pool);
+    // A lowered-pitch female voice still sounds female, so without a natural male voice the
+    // male tone takes a synthetic male one (Reed, then Eddy), which at least sounds male.
+    if (t === 'male') {
+      const synth = pool.filter((v) => gender(v) === 'm').sort((a, b) => rankMale(a) - rankMale(b));
+      return first(real.filter((v) => gender(v) === 'm')) || first(synth) || first(real) || first(pool);
+    }
+    if (t === 'robot') return first(pool.filter((v) => tier(v) === 0 && gender(v) === 'm')) || first(pool.filter((v) => tier(v) === 0)) || first(real) || first(pool);
+    return first(real) || first(pool);
+  }
+
+  function applyTone(t) {
+    tone = TONES[t] && OFFERED.includes(t) ? t : 'natural';
+    store.set('tone', tone);
+    toneInputs.forEach((inp) => { inp.checked = inp.value === tone; });
+    const v = pickToneVoice(tone);
+    if (v) selectVoice(v, true);
+    else store.set('voice', null);
+    const preset = TONES[tone];
+    rateEl.value = preset.rate;
+    // Male-voiced tones fall back to another pitch when this device has no male voice.
+    pitchEl.value = preset.alt != null && !(voice && gender(voice) === 'm') ? preset.alt : preset.pitch;
+    // The Typecast voice already speaks like the recording, so start it unmodified.
+    if (tone === 'jeolla' && tcActive()) { rateEl.value = 1; pitchEl.value = 1; }
+    store.set('rate', +rateEl.value);
+    store.set('pitch', +pitchEl.value);
+    naturalEl.disabled = tone === 'robot';
+    updateOutputs();
+    updateMeter();
+    renderToneNote();
+    wave.redraw();
+    if (tone === 'mine') mineLoad();
+    else $('mineBox').hidden = true;
+  }
+
+  function renderToneNote() {
+    const name = voice ? cleanName(voice.name) : '브라우저 기본';
+    const g = voice ? gender(voice) : '';
+    let msg, detail = '';
+    if (tone === 'jeolla') {
+      const ch = toJeolla(scriptEl.value).changes;
+      const shown = ch.slice(0, 3).map(([a, b]) => `${a}→${b}`).join(', ');
+      const real = tcActive();
+      const local = tc.provider === 'local';
+      msg = `${real ? (local ? `녹음 속 ‘${tc.voice.name}’` : `Typecast ‘${tc.voice.name}’`) : name} 목소리로 전라도 말투로 바꿔 읽어요. ` + (ch.length
+        ? `이 대본에서는 ${ch.length}곳을 바꿔요 (${shown}${ch.length > 3 ? ' 등' : ''}).`
+        : '이 대본에는 바꿀 표현이 없어요.');
+      detail = real
+        ? (local
+          ? '폴더 녹음을 본보기로 내 Mac에서 복제한 목소리예요. 빠르기는 아래 슬라이더로 조절할 수 있어요.'
+          : '녹음에 쓴 Typecast 캐릭터가 직접 읽어요. 빠르기와 높이는 아래 슬라이더로 조절할 수 있어요.')
+        : tc.state === 'ready'
+          ? '녹음 목소리 패널에서 목소리를 고르면 녹음과 같은 목소리로 읽어요.'
+          : '녹음 목소리 패널에서 연결하면 녹음 속 목소리로 읽어요. 지금은 브라우저 음성으로 녹음의 빠르기(약 1.25배)와 높이만 흉내 내요.';
+    } else if (tone === 'mine') {
+      const v = mine.voices.find((x) => x.id === mine.id);
+      msg = !tc.mcp
+        ? '내 목소리는 이 페이지를 Claude 데스크톱 앱이나 로컬 웹사이트에서 열었을 때만 쓸 수 있어요.'
+        : v
+          ? `‘${v.name}’ 녹음을 본보기로 내 Mac에서 복제한 목소리로 대본 그대로 읽어요. 새 문장은 10초 안팎 걸리고, 한 번 읽은 문장은 바로 나와요.`
+          : '녹음한 목소리를 내 Mac에서 복제해 대본 그대로 읽어요. 아래에서 읽을 목소리를 고르거나 새로 등록해 주세요.';
+    } else if (tone === 'female') {
+      msg = g === 'm'
+        ? `지금 고른 ${name} 목소리는 남성 음성이에요. 목소리 목록에서 여성 음성을 고르면 더 잘 어울려요.`
+        : `${name} 목소리로 조금 느리고 차분하게, 쉼을 길게 두어 읽어요.`;
+    } else if (tone === 'male') {
+      if (g === 'm' && tier(voice) === 0) msg = `이 기기에는 자연스러운 한국어 남성 음성이 없어서 합성 남성 음성 ${name.replace(/\s*\(.*$/, '')}로 읽어요. 조금 딱딱하게 들릴 수 있어요. Microsoft Edge에서 열면 InJoon 같은 자연스러운 남성 음성을 쓸 수 있어요.`;
+      else if (g === 'm') msg = `${name} 목소리로 낮고 묵직하게 읽어요.`;
+      else if (ordered.some((v) => isKo(v) && tier(v) > 0 && gender(v) === 'm')) msg = `${name} 목소리의 음높이를 낮춰 읽어요. 목소리 목록에서 남성 음성을 고를 수도 있어요.`;
+      else msg = `이 기기에는 한국어 남성 음성이 없어서 ${name} 목소리의 음높이를 낮춰 읽어요. Microsoft Edge에서 열면 InJoon 같은 남성 음성을 쓸 수 있어요.`;
+    } else if (tone === 'robot') {
+      msg = `${voice && tier(voice) === 0 ? '합성음인 ' : ''}${name} 목소리로 음높이를 고정하고 한 마디씩 끊어 읽어요.`;
+    } else {
+      msg = `${name} 목소리로 자연스럽게 읽어요.`;
+    }
+    toneNote.textContent = msg;
+    if (detail) {
+      const d = document.createElement('span');
+      d.className = 'tone-detail';
+      d.textContent = detail;
+      toneNote.append(d);
+    }
+  }
+
+  /* ---------- Jeolla dialect ---------- */
+  // Rules taken from the standard vs. dialect takes of the same script (인데→인디, 으니까→응께,
+  // 저쪽→저짝, 가까운→가차운, 예쁘게→이쁘게, 아니에요→아니오, 아→오메) plus common Jeolla endings.
+  const JONG = (ch) => { const c = ch.charCodeAt(0) - 0xAC00; return c >= 0 && c < 11172 ? c % 28 : -1; };
+  const withJong = (ch, j) => String.fromCharCode(ch.charCodeAt(0) - JONG(ch) + j);
+  const J_NIEUN = 4, J_IEUNG = 21;
+  const J_INTERJ = /^(아|아이고|어머|어머나|세상에|와)$/;
+  const J_WORDS = [
+    [/^저쪽/, '저짝'], [/^이쪽/, '이짝'], [/^그쪽/, '그짝'],
+    [/^가까운/, '가차운'], [/^가까이/, '가차이'], [/^가까워/, '가차워'], [/^가깝/, '가찹'],
+    [/^예쁘/, '이쁘'], [/^예뻐/, '이뻐'], [/^예뻤/, '이뻤'],
+    [/^(정말|진짜)(로)?$/, '참말로'],
+    [/^(너무|엄청|되게|무척)$/, '겁나게'],
+    [/^(그런데|근데)$/, '근디'],
+    [/^(그래서|그러니까)$/, '그랑께'],
+    [/^(그죠|그쵸|그렇죠|그렇지)$/, '그라제'],
+    [/^아니에요$/, '아니오']
+  ];
+
+  function jeollaWord(w, initial, final, prev) {
+    if (initial && J_INTERJ.test(w)) return '오메';
+    for (const [re, to] of J_WORDS) if (re.test(w)) { w = w.replace(re, to); break; }
+    // the noun 데 ("place") after a modifier: 좋은 데 → 좋은 디
+    if (/^데(서|로|가|도|는|를|에)?$/.test(w) && prev && JONG(prev.slice(-1)) === J_NIEUN) w = '디' + w.slice(1);
+    // -ㄴ데 → -ㄴ디
+    w = w.replace(/(.)데(요)?$/, (m, p, yo) => (JONG(p) === J_NIEUN ? p + '디' + (yo || '') : m));
+    // -으니까 → -응께, -니까 → -ㅇ께 (가니까 → 강께); formal -ㅂ니까 stays
+    w = w.replace(/(.)니까(요)?$/, (m, p, yo) => {
+      if (p === '으') return '응께' + (yo || '');
+      return JONG(p) === 0 ? withJong(p, J_IEUNG) + '께' + (yo || '') : m;
+    });
+    // -겠- → -것-
+    w = w.replace(/겠지$/, '것제').replace(/겠(네|다|어|소|구나)/, '것$1');
+    // -버렸다 → -부렀다
+    if (/[아어여해]버(렸|려|린)/.test(w) || (/^버(렸|려|린)/.test(w) && prev && /[아어여해]$/.test(prev))) {
+      w = w.replace('버렸', '부렀').replace('버려', '부러').replace('버린', '부린');
+    }
+    if (final) {
+      if (/지요$/.test(w)) w = w.replace(/지요$/, '지라우');
+      else if (/죠$/.test(w) && w.length > 1) w = w.slice(0, -1) + '지라우';
+      else if (/지$/.test(w) && w.length > 1 && !/(까|가|바)지$/.test(w)) w = w.slice(0, -1) + '제';
+    }
+    return w;
+  }
+
+  function toJeolla(text) {
+    const changes = [];
+    let prev = '';
+    const out = text.replace(/[가-힣]+/g, (w, off, s) => {
+      const before = s.slice(0, off).replace(/[\s"'“‘(\[]+$/, '');
+      const after = s.slice(off + w.length).replace(/^["'”’)\]]+/, '');
+      const initial = !before || /[.!?。！？…\n]$/.test(s.slice(0, off).replace(/[ \t"'“‘(\[]+$/, ''));
+      const final = !after.trim() || /^\s*[.!?。！？…\n]/.test(after);
+      const r = jeollaWord(w, initial, final, prev);
+      prev = w;
+      if (r !== w) changes.push([w, r]);
+      return r;
+    });
+    return { text: out, changes };
+  }
+
+  toneInputs.forEach((inp) => inp.addEventListener('change', () => {
+    if (!inp.checked) return;
+    const cur = st.status !== 'idle' ? st.segs[st.idx] : null;
+    applyTone(inp.value);
+    // Re-split and carry on from the same place so the new tone is heard right away.
+    if (cur) play(cur.start);
+  }));
+
+  function checkLang() {
+    const hasHangul = /[가-힣]/.test(scriptEl.value);
+    const hasKo = ordered.some(isKo);
+    let msg = '';
+    if (ordered.length && !hasKo) msg = '이 기기에는 한국어 목소리가 없어요. 한글 문장은 발음이 어색하게 들릴 수 있어요.';
+    else if (voice && hasHangul && !isKo(voice)) msg = '고른 목소리가 한국어 음성이 아니에요. 한글 문장은 한국어 목소리로 들어야 자연스러워요.';
+    voiceWarn.textContent = msg;
+    voiceWarn.hidden = !msg;
+  }
+
+  voiceSel.addEventListener('change', () => selectVoice(ordered[+voiceSel.value], true));
+
+  /* ---------- Settings & meter ---------- */
+  function estimateSeconds(text) {
+    const hangul = (text.match(/[가-힣]/g) || []).length;
+    const words = (text.match(/[A-Za-z]+/g) || []).length;
+    const digits = (text.match(/\d/g) || []).length;
+    let sec = (hangul + digits * 1.5) / 5 + words / 2.6;
+    sec /= +rateEl.value || 1;
+    if (tone === 'robot') sec += buildSegs(text).length * 0.16;
+    else if (naturalEl.checked) sec += splitScript(text).length * 0.34 * (STYLE[tone] || STYLE.natural).gap;
+    return sec;
+  }
+
+  function updateMeter() {
+    const text = scriptEl.value;
+    const n = text.replace(/\s/g, '').length;
+    if (!n) { meter.textContent = '0자'; return; }
+    const sec = Math.max(1, Math.round(estimateSeconds(text)));
+    const dur = sec < 60 ? `${sec}초` : `${Math.floor(sec / 60)}분 ${sec % 60}초`;
+    // Typecast charges 1 credit per character sent.
+    const credits = tcActive() && curProv() === 'typecast' ? ` · 최대 ${toJeolla(text).text.length.toLocaleString('ko-KR')}크레딧` : '';
+    meter.textContent = `${n.toLocaleString('ko-KR')}자 · 약 ${dur}${credits}`;
+  }
+
+  function updateOutputs() {
+    const r = +rateEl.value, p = +pitchEl.value;
+    rateOut.textContent = `${r.toFixed(2)}× · 약 ${Math.round(300 * r)}음절/분`;
+    if (tcActive() && curProv() === 'local') {
+      pitchOut.textContent = '복제 목소리는 높이 고정';
+    } else if (tcActive()) {
+      const semis = Math.round(clamp(12 * Math.log2(p), -12, 12));
+      pitchOut.textContent = semis ? `${semis > 0 ? '+' : '−'}${Math.abs(semis)}반음` : '기본';
+    } else {
+      pitchOut.textContent = Math.abs(p - 1) < 0.001 ? '기본' : `${p > 1 ? '+' : '−'}${Math.round(Math.abs(p - 1) * 100)}%`;
+    }
+  }
+
+  rateEl.addEventListener('input', () => { updateOutputs(); updateMeter(); store.set('rate', +rateEl.value); });
+  pitchEl.addEventListener('input', () => { updateOutputs(); store.set('pitch', +pitchEl.value); });
+  naturalEl.addEventListener('change', () => { updateMeter(); store.set('natural', naturalEl.checked); });
+
+  let draftTimer = 0;
+  function onScriptChange() {
+    updateMeter();
+    checkLang();
+    if (tone === 'jeolla') renderToneNote();
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(() => store.set('draft', scriptEl.value), 300);
+  }
+  scriptEl.addEventListener('input', () => { hideNotice(); onScriptChange(); });
+
+  /* ---------- Examples ---------- */
+  const examplesEl = $('examples');
+  EXAMPLES.forEach(([label, text]) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.textContent = label;
+    b.addEventListener('click', () => {
+      if (st.status !== 'idle') stop();
+      scriptEl.value = text;
+      hideNotice();
+      onScriptChange();
+    });
+    examplesEl.append(b);
+  });
+
+  /* ---------- Takes ---------- */
+  let takes = store.get('takes', []);
+  let takeNo = store.get('takeNo', 0);
+  if (!Array.isArray(takes)) takes = [];
+
+  function addTake(text) {
+    const t = text.trim();
+    if (!t) return;
+    const found = takes.findIndex((k) => k.text === t);
+    if (found >= 0) {
+      const [k] = takes.splice(found, 1);
+      k.at = Date.now();
+      takes.unshift(k);
+    } else {
+      takeNo += 1;
+      takes.unshift({ no: takeNo, text: t, at: Date.now() });
+      takes = takes.slice(0, 12);
+      store.set('takeNo', takeNo);
+    }
+    store.set('takes', takes);
+    renderTakes();
+  }
+
+  const timeFmt = new Intl.DateTimeFormat('ko-KR', { hour: 'numeric', minute: '2-digit' });
+  const dateFmt = new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric' });
+  function when(ts) {
+    const d = new Date(ts), now = new Date();
+    const time = timeFmt.format(d);
+    return d.toDateString() === now.toDateString() ? `오늘 ${time}` : `${dateFmt.format(d)} ${time}`;
+  }
+
+  const ICON_PLAY = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M8 5.6v12.8a1 1 0 0 0 1.52.85l10.3-6.4a1 1 0 0 0 0-1.7L9.52 4.75A1 1 0 0 0 8 5.6z" fill="currentColor"/></svg>';
+  const ICON_LOAD = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function renderTakes() {
+    takesEl.textContent = '';
+    takes.forEach((k, i) => {
+      const li = document.createElement('li');
+      li.className = 'take';
+      const no = document.createElement('span');
+      no.className = 'take-no';
+      no.textContent = 'T' + String(k.no).padStart(2, '0');
+      no.title = `테이크 ${k.no}`;
+      const body = document.createElement('div');
+      body.className = 'take-body';
+      const p = document.createElement('p');
+      p.className = 'take-text';
+      p.textContent = k.text;
+      const meta = document.createElement('span');
+      meta.className = 'take-meta';
+      meta.textContent = `${when(k.at)} · ${k.text.replace(/\s/g, '').length}자`;
+      body.append(p, meta);
+      const actions = document.createElement('div');
+      actions.className = 'take-actions';
+      const mk = (act, label, icon) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'icon-btn';
+        b.dataset.act = act;
+        b.dataset.i = i;
+        b.title = label;
+        b.setAttribute('aria-label', `${label}: 테이크 ${k.no}`);
+        b.innerHTML = icon;
+        return b;
+      };
+      actions.append(mk('play', '다시 듣기', ICON_PLAY), mk('load', '대본에 넣기', ICON_LOAD));
+      li.append(no, body, actions);
+      takesEl.append(li);
+    });
+    takesEmpty.hidden = takes.length > 0;
+    clearBtn.hidden = takes.length === 0;
+  }
+
+  takesEl.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-act]');
+    if (!b) return;
+    const k = takes[+b.dataset.i];
+    if (!k) return;
+    if (st.status !== 'idle') stop();
+    scriptEl.value = k.text;
+    hideNotice();
+    onScriptChange();
+    if (b.dataset.act === 'play') play();
+    else scriptEl.focus();
+  });
+
+  clearBtn.addEventListener('click', () => {
+    takes = [];
+    store.set('takes', takes);
+    renderTakes();
+  });
+
+  /* ---------- Waveform ---------- */
+  const wave = (() => {
+    const ctx = canvas.getContext('2d');
+    const N = 56;
+    const lv = new Float32Array(N);
+    let energy = 0, raf = 0, lastBoundary = 0, lastPulse = 0, colors = null, colorsAt = 0, w = 0, h = 0, dpr = 1;
+    const env = (i) => Math.pow(Math.sin(Math.PI * (i + 0.5) / N), 0.7);
+
+    function readColors(now) {
+      if (colors && now - colorsAt < 600) return;
+      const cs = getComputedStyle(document.documentElement);
+      colors = { on: cs.getPropertyValue('--accent').trim(), off: cs.getPropertyValue('--line').trim() };
+      colorsAt = now;
+    }
+
+    function draw(now) {
+      if (!w || !h) return;
+      readColors(now);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      const step = w / N, bw = Math.max(2, step * 0.46), mid = h / 2;
+      const robot = tone === 'robot';
+      for (let i = 0; i < N; i++) {
+        // The robot tone draws stepped, square-cornered bars.
+        const v = robot ? Math.round(lv[i] * 4) / 4 : lv[i];
+        const amp = Math.max(v * (mid - 2), 1.25);
+        const x = i * step + (step - bw) / 2;
+        ctx.fillStyle = v > 0.03 ? colors.on : colors.off;
+        ctx.beginPath();
+        if (ctx.roundRect && !robot) ctx.roundRect(x, mid - amp, bw, amp * 2, bw / 2);
+        else ctx.rect(x, mid - amp, bw, amp * 2);
+        ctx.fill();
+      }
+    }
+
+    function frame(now) {
+      const speaking = st.status === 'speaking' && !st.loading;
+      // Engines without word events still get a syllable-paced pulse.
+      if (speaking && now - lastBoundary > 450 && now - lastPulse > 170 / (+rateEl.value || 1)) {
+        energy = Math.max(energy, 0.45 + Math.random() * 0.35);
+        lastPulse = now;
+      }
+      energy *= speaking ? 0.94 : 0.85;
+      let peak = 0;
+      const cap = tone === 'female' ? 0.72 : 1;
+      const tf = tone === 'male' ? 0.6 : tone === 'jeolla' ? 1.3 : 1;
+      for (let i = 0; i < N; i++) {
+        const n = 0.55 + 0.45 * Math.sin(i * 0.9 + now * 0.011 * tf) * Math.sin(i * 0.31 - now * 0.007 * tf);
+        lv[i] += (energy * cap * env(i) * n - lv[i]) * 0.3;
+        if (lv[i] > peak) peak = lv[i];
+      }
+      if (!speaking && energy < 0.01 && peak < 0.01) {
+        lv.fill(0);
+        draw(now);
+        raf = 0;
+        return;
+      }
+      draw(now);
+      raf = requestAnimationFrame(frame);
+    }
+
+    function still() {
+      const level = st.status === 'speaking' ? 0.55 : st.status === 'paused' ? 0.25 : 0;
+      for (let i = 0; i < N; i++) lv[i] = level * env(i) * (0.6 + 0.4 * Math.abs(Math.sin(i * 1.7)));
+      draw(performance.now());
+    }
+
+    function wake() {
+      if (reduceMotion.matches) return still();
+      if (!raf) raf = requestAnimationFrame(frame);
+    }
+
+    function pulse(a) {
+      energy = Math.min(1, Math.max(energy, a) + 0.12);
+      lastPulse = performance.now();
+      wake();
+    }
+
+    function resize() {
+      const r = canvas.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = r.width; h = r.height;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      draw(performance.now());
+    }
+
+    function redraw() { colors = null; draw(performance.now()); }
+
+    if ('ResizeObserver' in window) new ResizeObserver(resize).observe(canvas);
+    else window.addEventListener('resize', resize);
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redraw);
+    new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    resize();
+
+    return {
+      pulse,
+      boundary() { lastBoundary = performance.now(); pulse(0.7 + Math.random() * 0.3); },
+      wake,
+      redraw
+    };
+  })();
+
+  /* ---------- Recorded voice (local clone or Typecast) ---------- */
+  // The page cannot run models or call outside APIs, so both engines are local MCP servers
+  // registered in the Claude app's claude_desktop_config.json (Claude Code's .mcp.json servers are not reachable from here).
+  // Both expose the same list_voices / speak tools. Only the 사투리 tone uses them.
+  const PROVIDERS = {
+    local: {
+      server: 'host:localvoice',
+      serverName: 'localvoice',
+      name: '내 Mac 복제',
+      intro: '사투리 톤을 폴더 녹음 속 인물의 목소리로 읽어요. 내 Mac에서 오픈소스 음성 복제 모델(Chatterbox)이 녹음을 본보기로 목소리를 만들어요.',
+      steps: [
+        '이 페이지를 Claude 데스크톱 앱에서 열어요. ‘localvoice’ 연결 서버는 Claude 앱 설정에 등록돼 있어서 앱이 알아서 켜요.',
+        '‘내 Mac 복제 연결하기’를 눌러요. 허용을 묻는 창이 뜨면 허용해요.',
+        '처음 읽을 때는 모델을 불러오느라 30초쯤 걸려요.'
+      ],
+      note: '내 Mac에서 만들어서 비용이 들지 않아요. 잡음 정리까지 문장 하나에 10초 남짓 걸리고, 한 번 만든 문장은 저장해 두어 다시 들을 때는 바로 나와요. 5분 동안 읽지 않으면 모델을 내려 메모리를 비워요.'
+    },
+    typecast: {
+      server: 'host:typecast',
+      serverName: 'typecast',
+      name: 'Typecast',
+      intro: '사투리 톤을 폴더 녹음에 쓴 Typecast 캐릭터 목소리로 읽어요. Typecast 가입과 API 키가 필요해요.',
+      steps: [
+        'voice 폴더의 <code>.env</code> 파일에 <code>TYPECAST_API_KEY=발급받은 키</code>를 한 줄로 적어요.',
+        '‘typecast’ 연결 서버가 Claude 앱 설정(<code>claude_desktop_config.json</code>)에 등록돼 있어야 해요. 새로 등록했다면 Claude 앱을 완전히 종료(⌘Q)했다가 다시 열어요.',
+        '이 페이지를 Claude 데스크톱 앱에서 열고 ‘Typecast 연결하기’를 눌러요.'
+      ],
+      note: '새 문장은 글자 수만큼 크레딧(1자에 1크레딧)을 써요. 한 번 만든 문장은 Mac에 저장해 두어서 다시 들을 때는 크레딧이 들지 않아요.'
+    }
+  };
+  const MODEL_ORDER = ['ssfm-v31', 'ssfm-v30', 'ssfm-v21'];
+  const EMOTIONS = { smart: '자동 (앞뒤 문장에 맞게)', normal: '보통', happy: '기쁨', sad: '슬픔', angry: '화남', toneup: '톤 업 (들뜬)', tonedown: '톤 다운 (차분한)', whisper: '속삭임' };
+  const AGES = { child: '어린이', teenager: '10대', young_adult: '청년', middle_age: '중년', elder: '노년' };
+  const TC_LABEL = { idle: '연결 안 됨', checking: '연결하는 중…', ready: '연결됨', needkey: 'API 키 필요', nohost: '데스크톱 앱 필요', error: '연결 오류' };
+  const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+  const savedProvider = store.get('tcProvider', 'local');
+  const tc = { mcp: null, provider: PROVIDERS[savedProvider] ? savedProvider : 'local', state: 'idle', voices: [], voice: null, emotion: store.get('tcEmotion', 'normal'), spent: 0 };
+  const tcCache = new Map();
+  const tcAudio = new Audio();
+  tcAudio.preload = 'auto';
+
+  const prov = () => PROVIDERS[tc.provider];
+  function tcActive() { return (tone === 'jeolla' && tc.state === 'ready' && !!tc.voice) || (tone === 'mine' && !!tc.mcp); }
+  // 내 목소리 always uses the local clone's my_voice, whatever the 녹음 목소리 panel has selected.
+  // The voice 내 목소리 reads with: the reader's pick from the 읽을 목소리 list (my_voice or a voice they added).
+  const mine = { voices: [], id: store.get('mineVoice', 'my_voice'), loaded: false };
+  const curProv = () => (tone === 'mine' ? 'local' : tc.provider);
+  const curVoice = () => (tone === 'mine' ? (mine.id ? { id: mine.id } : null) : tc.voice);
+
+  function renderProvider() {
+    const p = prov();
+    tcProviderInputs.forEach((inp) => { inp.checked = inp.value === tc.provider; });
+    tcSteps.innerHTML = p.steps.map((s) => `<li>${s}</li>`).join('');
+    tcSearch.placeholder = tc.provider === 'typecast' ? '이름으로 찾기' : '이름으로 찾기 (예: 창수)';
+    renderSpent();
+  }
+
+  function tcSetState(state, msg) {
+    tc.state = state;
+    tcStatus.dataset.state = state;
+    tcStatusText.textContent = state === 'ready' && !tc.voice ? '연결됨 · 목소리를 골라 주세요' : TC_LABEL[state];
+    if (msg != null) tcMsg.textContent = msg;
+    tcSteps.hidden = state === 'ready';
+    tcConnect.hidden = state === 'ready' || state === 'checking';
+    tcConnect.textContent = state === 'idle' ? `${prov().name} 연결하기` : '다시 연결하기';
+    tcSearch.disabled = tcVoiceSel.disabled = tcEmotionSel.disabled = state !== 'ready';
+    renderToneNote();
+    updateOutputs();
+    updateMeter();
+    updateTransport();
+  }
+
+  // Each failure code has its own fix, so each gets its own message.
+  function tcErrorInfo(err) {
+    const code = err && err.code;
+    if (code === 'tool_error') {
+      let inner = null;
+      const r = err.result;
+      try { inner = (r && r.payload) || JSON.parse(r.content[0].text); } catch (e) { inner = null; }
+      if (inner && (inner.error === 'no_key' || inner.error === 'auth' || inner.error === 'forbidden')) return ['needkey', inner.message];
+      return ['error', (inner && inner.message) || err.message || '연결 서버가 요청을 처리하지 못했어요.'];
+    }
+    switch (code) {
+      case 'server_not_connected':
+        return ['nohost', `‘${PROVIDERS[curProv()].serverName}’ 연결 서버를 찾지 못했어요. 이 페이지를 Claude 데스크톱 앱에서 열고, Claude 앱 설정(claude_desktop_config.json)에 ‘${PROVIDERS[curProv()].serverName}’ 서버가 등록돼 있는지 확인해 주세요. 새로 등록했다면 앱을 완전히 종료(⌘Q)했다가 다시 열어야 해요.`];
+      case 'not_in_manifest':
+      case 'blocked_by_policy':
+        return ['error', '이 페이지에서 연결 서버 사용이 허용되지 않았어요. 아티팩트의 권한 메뉴에서 켤 수 있어요.'];
+      case 'approval_required':
+        return ['error', '연결 서버 사용을 허용해야 해요. 다시 연결하기를 누르면 허용 여부를 물어봐요.'];
+      case 'cancelled':
+        return ['error', '호출이 취소됐어요. 다시 연결하기를 눌러 주세요.'];
+      case 'server_unavailable':
+      case 'upstream_error':
+        return ['error', '연결 서버가 제때 응답하지 않았어요. 처음에는 모델을 불러오느라 늦을 수 있어요. 잠시 후 다시 시도해 주세요.'];
+      case 'not_granted':
+      case 'capability_disabled':
+      case 'capability_removed':
+        return ['nohost', '이 화면에서는 녹음 목소리를 쓸 수 없어요. 이 페이지를 Claude 데스크톱 앱에서 열어 주세요.'];
+      default:
+        return ['error', (err && err.message) || '연결에 실패했어요.'];
+    }
+  }
+
+  const tcMcpP = window.claude && typeof window.claude.use === 'function'
+    ? window.claude.use('mcp').catch(() => null)
+    : Promise.resolve(null);
+
+  async function tcConnectNow(byUser) {
+    const provider = tc.provider;
+    tcSetState('checking', '목소리 목록을 불러오는 중이에요.');
+    const mcp = tc.mcp || await tcMcpP;
+    if (provider !== tc.provider) return;
+    if (!mcp) return tcSetState('nohost', '이 화면에서는 녹음 목소리를 쓸 수 없어요. 이 페이지를 Claude 데스크톱 앱에서 열어 주세요.');
+    tc.mcp = mcp;
+    try {
+      const res = await mcp.callTool(prov().server, 'list_voices', {}, { cache: false });
+      if (provider !== tc.provider) return;
+      const list = (res && res.payload && res.payload.voices) || [];
+      tc.voices = list.map((v) => {
+        const models = v.models || [];
+        const model = MODEL_ORDER.find((m) => models.some((x) => x.version === m)) || (models[0] && models[0].version) || 'ssfm-v31';
+        const emotions = (models.find((x) => x.version === model) || {}).emotions || [];
+        return { id: v.id, name: v.name, nameEng: v.name_eng || '', gender: v.gender, age: v.age, custom: !!v.custom, uses: v.use_cases || [], model, emotions };
+      });
+      store.set('tcConnected:' + provider, true);
+      const saved = store.get('tcVoice:' + provider, null);
+      // The local clone lists the recording's people with 창수 first, so default to him.
+      tc.voice = tc.voices.find((v) => saved && v.id === saved.id) || (provider === 'local' ? tc.voices[0] || null : null);
+      renderTcVoices();
+      tcSetState('ready', tc.voice
+        ? `‘${tc.voice.name}’ 목소리로 사투리 톤을 읽어요.`
+        : tc.voices.length
+          ? `목소리 ${tc.voices.length}개를 불러왔어요. 폴더 녹음에 쓴 캐릭터를 골라 주세요.`
+          : '쓸 수 있는 목소리가 없어요.');
+      if (byUser && tone === 'jeolla' && tc.voice) tcNeutral();
+    } catch (err) {
+      if (provider !== tc.provider) return;
+      const [state, msg] = tcErrorInfo(err);
+      tcSetState(state, msg);
+    }
+  }
+
+  function tcNeutral() {
+    rateEl.value = 1;
+    pitchEl.value = 1;
+    store.set('rate', 1);
+    store.set('pitch', 1);
+    updateOutputs();
+    updateMeter();
+  }
+
+  function renderTcVoices() {
+    const q = tcSearch.value.trim().toLowerCase();
+    const list = tc.voices.filter((v) => !q || v.name.toLowerCase().includes(q) || v.nameEng.toLowerCase().includes(q) || v.uses.some((u) => u.toLowerCase().includes(q)));
+    if (tc.voice && !list.includes(tc.voice)) list.unshift(tc.voice);
+    tcVoiceSel.textContent = '';
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = list.length ? '캐릭터를 골라 주세요' : '찾는 이름이 없어요';
+    tcVoiceSel.append(ph);
+    list.forEach((v) => {
+      const o = document.createElement('option');
+      o.value = v.id;
+      const gender = v.gender === 'male' ? '남성' : v.gender === 'female' ? '여성' : '';
+      o.textContent = [v.name + (v.nameEng && v.nameEng !== v.name ? ` (${v.nameEng})` : ''), v.custom ? '내 목소리' : '', gender, AGES[v.age] || ''].filter(Boolean).join(' · ');
+      tcVoiceSel.append(o);
+    });
+    tcVoiceSel.value = tc.voice ? tc.voice.id : '';
+    renderTcEmotions();
+  }
+
+  function renderTcEmotions() {
+    const v = tc.voice;
+    const smart = v && /^ssfm-v3/.test(v.model) ? ['smart'] : [];
+    const opts = smart.concat((v && v.emotions.length ? v.emotions : ['normal']).filter((e) => EMOTIONS[e] && e !== 'smart'));
+    tcEmotionSel.textContent = '';
+    opts.forEach((e) => {
+      const o = document.createElement('option');
+      o.value = e;
+      o.textContent = EMOTIONS[e];
+      tcEmotionSel.append(o);
+    });
+    if (!opts.includes(tc.emotion)) tc.emotion = opts[0];
+    tcEmotionSel.value = tc.emotion;
+  }
+
+  function renderSpent() {
+    tcCredit.textContent = prov().note
+      + (tc.provider === 'typecast' && tc.spent ? ` 이 페이지를 연 뒤로 ${tc.spent.toLocaleString('ko-KR')}크레딧을 썼어요.` : '');
+  }
+
+  tcProviderInputs.forEach((inp) => inp.addEventListener('change', () => {
+    if (!inp.checked || inp.value === tc.provider) return;
+    if (st.engine === 'tc' && st.status !== 'idle') stop();
+    tc.provider = inp.value;
+    store.set('tcProvider', tc.provider);
+    tc.voices = [];
+    tc.voice = null;
+    tcSearch.value = '';
+    tcVoiceSel.innerHTML = '<option value="">연결하면 목록이 나와요</option>';
+    renderTcEmotions();
+    renderProvider();
+    tcSetState('idle', prov().intro);
+    if (tc.mcp && store.get('tcConnected:' + tc.provider, false)) tcConnectNow(false);
+  }));
+
+  tcConnect.addEventListener('click', () => tcConnectNow(true));
+  tcSearch.addEventListener('input', renderTcVoices);
+  tcVoiceSel.addEventListener('change', () => {
+    tc.voice = tc.voices.find((v) => v.id === tcVoiceSel.value) || null;
+    store.set('tcVoice:' + tc.provider, tc.voice ? { id: tc.voice.id } : null);
+    renderTcEmotions();
+    if (tone === 'jeolla' && tc.voice) tcNeutral();
+    tcSetState('ready', tc.voice ? `‘${tc.voice.name}’ 목소리로 사투리 톤을 읽어요.` : '폴더 녹음에 쓴 캐릭터를 골라 주세요.');
+  });
+  tcEmotionSel.addEventListener('change', () => {
+    tc.emotion = tcEmotionSel.value;
+    store.set('tcEmotion', tc.emotion);
+  });
+
+  // Safari only lets audio start inside a click; play a silent clip there to unlock later playback.
+  function unlockAudio() {
+    try {
+      tcAudio.src = SILENT_WAV;
+      const p = tcAudio.play();
+      if (p) p.catch(() => {});
+    } catch (e) {}
+  }
+
+  function tcRequest(i) {
+    const seg = st.segs[i];
+    // The local clone takes only text, voice and mood; its speed is applied at playback.
+    if (curProv() === 'local') return { text: seg.text, voice_id: curVoice().id, emotion: tone === 'mine' ? 'normal' : tc.emotion };
+    const req = {
+      text: seg.text,
+      voice_id: tc.voice.id,
+      model: tc.voice.model,
+      language: 'kor',
+      emotion: tc.emotion,
+      audio_tempo: Math.round(clamp(+rateEl.value, 0.5, 2) * 100) / 100,
+      audio_pitch: Math.round(clamp(12 * Math.log2(+pitchEl.value), -12, 12))
+    };
+    if (tc.emotion === 'smart') {
+      if (st.segs[i - 1]) req.previous_text = st.segs[i - 1].text;
+      if (st.segs[i + 1]) req.next_text = st.segs[i + 1].text;
+    }
+    return req;
+  }
+
+  // One request per sentence, remembered so replays and prefetches never pay twice.
+  function tcClip(i) {
+    if (!st.segs[i] || !curVoice() || !tc.mcp) return Promise.resolve(null);
+    const req = tcRequest(i);
+    const key = curProv() + JSON.stringify(req);
+    if (!tcCache.has(key)) {
+      const p = tc.mcp.callTool(PROVIDERS[curProv()].server, 'speak', req, { cache: false }).then((res) => {
+        const pl = res && res.payload;
+        if (!pl || !pl.audio_base64) throw { code: 'tool_error', message: '연결 서버에서 받은 음성이 비어 있어요. 다시 읽어 주세요.' };
+        if (!pl.cached && pl.chars) { tc.spent += pl.chars; renderSpent(); }
+        return { url: `data:${pl.mime || 'audio/mpeg'};base64,${pl.audio_base64}` };
+      });
+      tcCache.set(key, p);
+      p.catch(() => tcCache.delete(key));
+    }
+    return tcCache.get(key);
+  }
+
+  async function tcNext(run) {
+    if (run !== st.run) return;
+    if (st.idx >= st.segs.length) return finish(run);
+    const i = st.idx;
+    st.loading = true;
+    markSeg(i);
+    let clip;
+    try {
+      clip = await tcClip(i);
+    } catch (err) {
+      if (run !== st.run) return;
+      stop();
+      const [state, msg] = tcErrorInfo(err);
+      if (state === 'nohost' || state === 'needkey') tcSetState(state, msg);
+      showNotice(msg, 'warn');
+      return;
+    }
+    if (run !== st.run) return;
+    st.loading = false;
+    updateTransport();
+    wave.wake();
+    if (st.status === 'paused') { st.pendingNext = true; return; }
+    if (curProv() === 'typecast') tcClip(i + 1).catch(() => {});
+    else if (!st.prefetching) { st.prefetching = true; tcPrefetch(run, i + 1); }
+    playClip(run, i, clip);
+  }
+
+  // The local clone makes a sentence slower than it plays, so queue every remaining sentence
+  // in order right away. (Typecast only looks one sentence ahead, so stopping early wastes no credits.)
+  async function tcPrefetch(run, from) {
+    for (let j = from; j < st.segs.length; j++) {
+      if (run !== st.run) return;
+      try { await tcClip(j); } catch (e) { return; }
+    }
+  }
+
+  function wordAt(t, at) {
+    const re = /\S+/g;
+    let m;
+    while ((m = re.exec(t))) if (at < m.index + m[0].length) return [m.index, m[0].length];
+    return null;
+  }
+
+  function playClip(run, i, clip) {
+    const seg = st.segs[i];
+    let lastWord = -1;
+    tcAudio.onended = () => {
+      if (run !== st.run) return;
+      clearWord(seg);
+      st.idx = i + 1;
+      if (st.idx >= st.segs.length) return finish(run);
+      if (st.status === 'paused') { st.pendingNext = true; return; }
+      st.timer = setTimeout(() => {
+        st.timer = null;
+        if (run !== st.run) return;
+        if (st.status === 'paused') { st.pendingNext = true; return; }
+        tcNext(run);
+      }, 120);
+    };
+    // Typecast returns no word timings here, so the highlight follows playback position.
+    tcAudio.ontimeupdate = () => {
+      if (run !== st.run || !isFinite(tcAudio.duration) || !tcAudio.duration) return;
+      const w = wordAt(seg.text, Math.floor((tcAudio.currentTime / tcAudio.duration) * seg.text.length));
+      if (w && w[0] !== lastWord) { lastWord = w[0]; markWord(seg, w[0], w[1]); }
+    };
+    tcAudio.onerror = () => {
+      if (run !== st.run) return;
+      stop();
+      showNotice(`${curProv() === 'typecast' ? 'Typecast' : '복제한'} 음성을 재생하지 못했어요. 다시 읽어 주세요.`, 'warn');
+    };
+    tcAudio.src = clip.url;
+    // Typecast applies speed itself; for the local clone, speed up playback (pitch is preserved).
+    tcAudio.defaultPlaybackRate = tcAudio.playbackRate = curProv() === 'local' ? clamp(+rateEl.value, 0.5, 2) : 1;
+    const p = tcAudio.play();
+    if (p) p.catch((err) => {
+      if (run !== st.run || (err && err.name === 'AbortError')) return;
+      stop();
+      showNotice('브라우저가 소리 재생을 막았어요. 읽기 버튼을 한 번 더 눌러 주세요.', 'warn');
+    });
+  }
+
+  /* ---------- 내 목소리: pick, record, upload ---------- */
+  const mineBox = $('mineBox'), mineSel = $('mineVoice'), mineDel = $('mineDel'), mineAdd = $('mineAdd');
+  const mineName = $('mineName'), mineRec = $('mineRec'), mineFile = $('mineFile'), minePreview = $('minePreview');
+  const mineSave = $('mineSave'), mineMsg = $('mineMsg');
+  let mineTake = null, mineRecorder = null, mineTimer = null;
+
+  function mineSay(text, kind) { mineMsg.textContent = text || ''; mineMsg.dataset.kind = kind || ''; }
+
+  async function mineLoad() {
+    mineBox.hidden = false;
+    if (!tc.mcp) { mineSel.innerHTML = '<option value="">Claude 데스크톱 앱이나 로컬 웹사이트에서 열어 주세요</option>'; return; }
+    try {
+      const res = await tc.mcp.callTool('host:localvoice', 'list_voices', {}, { cache: false });
+      const all = (res && res.payload && res.payload.voices) || [];
+      // Only the reader's own recordings: my_voice and voices added here (not the folder recording's characters).
+      mine.voices = all.filter((v) => v.id === 'my_voice' || v.user_added);
+      mine.loaded = true;
+      if (!mine.voices.some((v) => v.id === mine.id)) mine.id = mine.voices[0] ? mine.voices[0].id : '';
+      renderMine();
+    } catch (err) {
+      const [, msg] = tcErrorInfo(err);
+      mineSel.innerHTML = '<option value="">목소리 목록을 불러오지 못했어요</option>';
+      mineSay(msg, 'warn');
+    }
+  }
+
+  function renderMine() {
+    mineSel.textContent = '';
+    if (!mine.voices.length) {
+      mineSel.innerHTML = '<option value="">아직 등록한 목소리가 없어요</option>';
+      mineAdd.open = true;
+    }
+    mine.voices.forEach((v) => {
+      const o = document.createElement('option');
+      o.value = v.id;
+      o.textContent = v.user_added ? v.name : `${v.name} (기본)`;
+      mineSel.append(o);
+    });
+    mineSel.value = mine.id;
+    const cur = mine.voices.find((v) => v.id === mine.id);
+    mineDel.hidden = !(cur && cur.user_added);
+    store.set('mineVoice', mine.id);
+    renderToneNote();
+  }
+
+  mineSel.addEventListener('change', () => {
+    if (st.engine === 'tc' && st.status !== 'idle') stop();
+    mine.id = mineSel.value;
+    renderMine();
+  });
+
+  mineDel.addEventListener('click', async () => {
+    const cur = mine.voices.find((v) => v.id === mine.id);
+    if (!cur || !cur.user_added) return;
+    if (mineDel.dataset.confirm !== cur.id) {
+      mineDel.dataset.confirm = cur.id;
+      mineDel.textContent = `‘${cur.name}’ 정말 지울까요? 한 번 더 누르면 지워져요`;
+      setTimeout(() => { if (mineDel.dataset.confirm === cur.id) { delete mineDel.dataset.confirm; mineDel.textContent = '이 목소리 지우기'; } }, 4000);
+      return;
+    }
+    delete mineDel.dataset.confirm;
+    mineDel.textContent = '이 목소리 지우기';
+    try {
+      const res = await tc.mcp.callTool('host:localvoice', 'remove_voice', { voice_id: cur.id }, { cache: false });
+      const n = (res && res.payload && res.payload.cached_removed) || 0;
+      mineSay(`‘${cur.name}’ 목소리를 지웠어요.${n ? ` 이 목소리로 읽어 둔 문장 ${n}개도 함께 지웠어요.` : ''}`, 'ok');
+      mine.id = '';
+      await mineLoad();
+    } catch (err) {
+      mineSay(tcErrorInfo(err)[1], 'warn');
+    }
+  });
+
+  // Any recording becomes a 24 kHz mono 16-bit WAV here, so the server needs no audio decoder.
+  async function toWav(blob) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new Ctx();
+    let buf;
+    try { buf = await ctx.decodeAudioData(await blob.arrayBuffer()); } finally { ctx.close && ctx.close(); }
+    const sr = 24000, secs = Math.min(buf.duration, 30);
+    const off = new OfflineAudioContext(1, Math.max(1, Math.round(secs * sr)), sr);
+    const src = off.createBufferSource();
+    src.buffer = buf;
+    src.connect(off.destination);
+    src.start();
+    const pcm = (await off.startRendering()).getChannelData(0);
+    let peak = 0;
+    for (let i = 0; i < pcm.length; i++) peak = Math.max(peak, Math.abs(pcm[i]));
+    const gain = peak > 0 && peak < 0.5 ? 0.9 / peak : 1; // bring quiet recordings up to a usable level
+    const out = new DataView(new ArrayBuffer(44 + pcm.length * 2));
+    const str = (o, t) => { for (let i = 0; i < t.length; i++) out.setUint8(o + i, t.charCodeAt(i)); };
+    str(0, 'RIFF'); out.setUint32(4, 36 + pcm.length * 2, true); str(8, 'WAVE'); str(12, 'fmt ');
+    out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, 1, true);
+    out.setUint32(24, sr, true); out.setUint32(28, sr * 2, true); out.setUint16(32, 2, true); out.setUint16(34, 16, true);
+    str(36, 'data'); out.setUint32(40, pcm.length * 2, true);
+    for (let i = 0; i < pcm.length; i++) out.setInt16(44 + i * 2, Math.max(-1, Math.min(1, pcm[i] * gain)) * 32767, true);
+    return { wav: new Blob([out.buffer], { type: 'audio/wav' }), seconds: secs, cut: buf.duration > 30 };
+  }
+
+  async function mineUse(blob, from) {
+    mineSay('녹음을 확인하는 중이에요…');
+    try {
+      const t = await toWav(blob);
+      if (t.seconds < 5) { mineTake = null; mineSave.disabled = true; minePreview.hidden = true; return mineSay(`녹음이 ${t.seconds.toFixed(1)}초로 너무 짧아요. 10초 안팎으로 다시 읽어 주세요.`, 'warn'); }
+      mineTake = t.wav;
+      minePreview.src = URL.createObjectURL(t.wav);
+      minePreview.hidden = false;
+      mineSave.disabled = false;
+      mineSay(`${from} ${t.seconds.toFixed(1)}초${t.cut ? ' (30초까지만 써요)' : ''}. 들어 보고 괜찮으면 이름을 적고 등록해 주세요.`, 'ok');
+    } catch (e) {
+      mineSay('이 파일은 읽을 수 없어요. m4a, mp3, wav 파일을 올려 주세요.', 'warn');
+    }
+  }
+
+  mineFile.addEventListener('change', () => { if (mineFile.files[0]) mineUse(mineFile.files[0], '올린 파일'); });
+
+  mineRec.addEventListener('click', async () => {
+    if (mineRecorder) { mineRecorder.stop(); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
+      return mineSay('이 화면에서는 바로 녹음할 수 없어요. 음성 메모 앱으로 녹음한 파일을 올려 주세요.', 'warn');
+    }
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    } catch (e) {
+      return mineSay('마이크를 쓸 수 없어요. 이 화면에서는 녹음이 막혀 있을 수 있어요. 음성 메모 앱으로 녹음한 파일을 올려 주세요.', 'warn');
+    }
+    const chunks = [];
+    mineRecorder = new MediaRecorder(stream);
+    mineRecorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+    mineRecorder.onstop = () => {
+      stream.getTracks().forEach((t) => t.stop());
+      clearInterval(mineTimer);
+      mineRecorder = null;
+      mineRec.setAttribute('aria-pressed', 'false');
+      mineRec.textContent = '다시 녹음';
+      mineUse(new Blob(chunks, { type: chunks[0] ? chunks[0].type : 'audio/webm' }), '녹음');
+    };
+    mineRecorder.start();
+    const t0 = Date.now();
+    mineRec.setAttribute('aria-pressed', 'true');
+    mineRec.textContent = '녹음 멈추기 · 0초';
+    mineSay('녹음 중이에요. 위 문장을 다 읽으면 멈추기를 눌러 주세요.');
+    mineTimer = setInterval(() => {
+      const s = Math.floor((Date.now() - t0) / 1000);
+      mineRec.textContent = `녹음 멈추기 · ${s}초`;
+      if (s >= 30 && mineRecorder) mineRecorder.stop();
+    }, 250);
+  });
+
+  mineSave.addEventListener('click', async () => {
+    const name = mineName.value.trim();
+    if (!name) { mineName.focus(); return mineSay('목소리 이름을 적어 주세요.', 'warn'); }
+    if (!mineTake || !tc.mcp) return;
+    mineSave.disabled = true;
+    mineSay('등록하는 중이에요…');
+    try {
+      const bytes = new Uint8Array(await mineTake.arrayBuffer());
+      let bin = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+      const res = await tc.mcp.callTool('host:localvoice', 'add_voice', { name, audio_base64: btoa(bin) }, { cache: false });
+      const v = res && res.payload && res.payload.voice;
+      mine.id = v ? v.id : mine.id;
+      mineTake = null;
+      mineName.value = '';
+      mineFile.value = '';
+      minePreview.hidden = true;
+      mineRec.textContent = '녹음 시작';
+      mineAdd.open = false;
+      await mineLoad();
+      mineSay(`‘${name}’ 목소리를 등록했어요. 이제 읽기를 누르면 이 목소리로 읽어요. 첫 문장은 20초쯤 걸릴 수 있어요.`, 'ok');
+    } catch (err) {
+      mineSave.disabled = false;
+      mineSay(tcErrorInfo(err)[1], 'warn');
+    }
+  });
+
+  /* ---------- Controls ---------- */
+  playBtn.addEventListener('click', () => {
+    if (st.status === 'idle') play();
+    else if (st.status === 'speaking') pause();
+    else resume();
+  });
+  stopBtn.addEventListener('click', stop);
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      playBtn.click();
+    } else if (e.key === 'Escape' && st.status !== 'idle') {
+      e.preventDefault();
+      stop();
+    }
+  });
+
+  window.addEventListener('pagehide', () => { if (synth) synth.cancel(); });
+
+  /* ---------- Init ---------- */
+  const savedRate = store.get('rate', null), savedPitch = store.get('pitch', null), savedNatural = store.get('natural', null);
+  if (typeof savedRate === 'number') rateEl.value = savedRate;
+  if (typeof savedPitch === 'number') pitchEl.value = savedPitch;
+  if (typeof savedNatural === 'boolean') naturalEl.checked = savedNatural;
+  const savedTone = store.get('tone', 'natural');
+  tone = TONES[savedTone] && OFFERED.includes(savedTone) ? savedTone : 'natural';
+  toneInputs.forEach((inp) => { inp.checked = inp.value === tone; });
+  naturalEl.disabled = tone === 'robot';
+  const draft = store.get('draft', null);
+  scriptEl.value = typeof draft === 'string' && draft.trim() ? draft : SAMPLE;
+
+  updateOutputs();
+  updateMeter();
+  renderTakes();
+  updateTransport();
+
+  if (!synth) {
+    voiceSel.innerHTML = '<option>사용할 수 있는 목소리 없음</option>';
+    toneNote.textContent = '';
+    showNotice('이 브라우저는 음성 합성을 지원하지 않아요. Chrome, Edge, Safari에서 열어 주세요.', 'warn');
+  } else {
+    synth.cancel();
+    if (!loadVoices()) {
+      if ('onvoiceschanged' in synth) synth.addEventListener('voiceschanged', loadVoices);
+      let tries = 0;
+      const poll = setInterval(() => {
+        tries++;
+        if (loadVoices()) clearInterval(poll);
+        else if (tries > 20) {
+          clearInterval(poll);
+          voiceSel.innerHTML = '<option>브라우저 기본 목소리</option>';
+          renderToneNote();
+          showNotice('이 기기에서 목소리 목록을 찾지 못했어요. 브라우저 기본 목소리로 읽어 볼게요.', 'info');
+        }
+      }, 250);
+    } else if ('onvoiceschanged' in synth) {
+      synth.addEventListener('voiceschanged', loadVoices);
+    }
+  }
+
+  renderProvider();
+  renderTcEmotions();
+  tcMsg.textContent = prov().intro;
+  tcConnect.textContent = `${prov().name} 연결하기`;
+  tcMcpP.then((m) => {
+    tc.mcp = m;
+    if (tone === 'mine') mineLoad();
+    renderToneNote();
+    updateOutputs();
+    updateTransport();
+    if (!m) tcSetState('nohost', '이 화면에서는 녹음 목소리를 쓸 수 없어요. 이 페이지를 Claude 데스크톱 앱에서 열어 주세요.');
+    else if (store.get('tcConnected:' + tc.provider, false)) tcConnectNow(false);
+  });
+})();
+</script>
+
+<script>
+(() => {
+  /* ---------- 진진가 ---------- */
+  // Answers a question about one of the five claims, puts the answer in the 대본 box and reads it.
+  // The booth is reached only through its controls (the textarea and its input event, and the
+  // 읽기 / 정지 buttons), so its voice code stays exactly as it is.
+  const $ = (id) => document.getElementById(id);
+  const scriptEl = $('script'), playBtn = $('playBtn'), stopBtn = $('stopBtn');
+  const booth = scriptEl.closest('.booth');
+  const cardsEl = $('jjCards'), form = $('jjForm'), qEl = $('jjQ'), askBtn = $('jjAsk'), introBtn = $('jjIntro');
+  const suggestEl = $('jjSuggest'), statusEl = $('jjStatus');
+  const logWrap = $('jjLogWrap'), logSum = $('jjLogSum'), logEl = $('jjLog'), logClear = $('jjLogClear');
+  const autoBtn = $('jjAuto'), echoBtn = $('jjEcho');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const canHover = window.matchMedia('(hover: hover)');
+
+  const keep = {
+    get(k, d) { try { const v = localStorage.getItem('jj:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem('jj:' + k, JSON.stringify(v)); } catch (e) {} }
+  };
+
+  // The one answer to any request to see proof, the same on every claim.
+  const PROOF_LINE = '아, 증거를 보여 드리는 건 게임 규칙 밖이라서요. 말로만 물어봐 주세요. 하하.';
+
+  // truth: what is really so. brief: how to answer, for Claude. qa: prepared answers, read as written.
+  // strong / weak: words in a question that point at the claim (counted 2 / 1).
+  // proof: for the made-up claims, a detail said right after PROOF_LINE so the refusal doesn't sound evasive.
+  // 공개용 예시 데이터: 가상의 발표자입니다. 실제로 쓸 때는 본인의 다섯 항목으로 바꾸세요.
+  const ITEMS = [
+    {
+      n: 1, claim: '나는 쌍둥이다', truth: true,
+      brief: '사실이다. 거짓처럼 보이게 한다: 짧게 답하고, "음…", "그냥…" 하며 머뭇거리고, 흐릿하게 말하고 화제를 돌린다. 쌍둥이가 아니라고 말하지는 않는다.',
+      strong: ['쌍둥이', '쌍둥'],
+      weak: ['형제', '자매', '동생', '언니', '오빠', '누나', '형이', '닮았', '똑같', '생일'],
+      qa: [
+        ['진짜 쌍둥이예요?', '음… 네, 뭐… 그렇죠.'],
+        ['누가 먼저 태어났어요?', '그게… 몇 분 차이라 별 의미 없어요. 하하.'],
+        ['얼굴 똑같아요?', '글쎄요, 보는 사람마다 다르게 말하더라고요.'],
+        ['생일 파티는 같이 해요?', '그냥… 그때그때 달라요.'],
+        ['쌍둥이라 좋은 점은요?', '음… 생각 안 해 봤는데요.']
+      ],
+      fallback: ['음… 그건… 그냥 넘어갈게요. 하하.', '글쎄요, 뭐… 그런 셈이죠.']
+    },
+    {
+      n: 2, claim: '고양이 두 마리를 키운다', truth: false,
+      brief: '거짓이다. 진짜처럼 보이게 한다: 바로, 막힘없이, 구체적인 생활 이야기로 답한다. 설정: 고양이 보리(코리안 숏헤어, 치즈색, 네 살, 먹보)와 콩이(러시안 블루, 두 살, 겁이 많음). 보리를 먼저 데려왔고 콩이는 길에서 구조함. 화장실 모래는 두부 모래, 아침마다 보리가 얼굴을 밟아 깨움.',
+      strong: ['고양이', '보리', '콩이', '냥이'],
+      weak: ['집사', '츄르', '모래', '사료', '털', '발톱', '병원', '구조', '숏헤어', '러시안'],
+      qa: [
+        ['고양이 이름이 뭐예요?', '보리랑 콩이예요. 보리는 치즈색이라 보리고, 콩이는 작아서 콩이에요.'],
+        ['몇 살이에요?', '보리는 네 살, 콩이는 두 살이에요.'],
+        ['둘이 사이 좋아요?', '보리가 먹보라 콩이 밥까지 넘봐서 밥은 따로 줘요. 그래도 잘 때는 붙어 자요.'],
+        ['어디서 데려왔어요?', '보리는 지인 집에서 입양했고, 콩이는 비 오는 날 길에서 구조했어요.'],
+        ['털 많이 빠져요?', '말도 마세요. 검은 옷은 이제 안 입어요. 하하.'],
+        ['아침에 깨워요?', '보리가 매일 아침 얼굴을 밟고 지나가요. 알람이 필요 없어요.']
+      ],
+      fallback: ['보리랑 콩이요? 지금쯤 창가에서 자고 있을 거예요.', '보리는 먹보고, 콩이는 겁이 많아요. 성격이 정반대예요.'],
+      proof: ['대신 보리는 츄르 봉지 소리만 나면 어디서든 달려와요.', '대신 콩이는 손님 오면 침대 밑에서 안 나와요.']
+    },
+    {
+      n: 3, claim: '제주도에서 1년 살았다', truth: false,
+      brief: '거짓이다. 진짜처럼 보이게 한다: 현재 기억처럼, 살아 본 사람만 아는 디테일을 섞어 답한다. 설정: 서귀포 위미리, 귤밭 옆 돌집, 겨울에 귤 따기 아르바이트, 버스가 한 시간에 한 대, 바람이 세서 우산이 소용없음, 동네 단골 국숫집.',
+      strong: ['제주', '서귀포'],
+      weak: ['한달살기', '귤', '바다', '오름', '올레', '이사', '돌집', '바람', '섬', '살았'],
+      qa: [
+        ['제주도 어디 살았어요?', '서귀포 위미리요. 귤밭 바로 옆 돌집이었어요.'],
+        ['왜 제주도 갔어요?', '그냥 일 년쯤 쉬고 싶어서요. 겨울엔 귤 따기 아르바이트도 했어요.'],
+        ['제일 불편한 건 뭐였어요?', '버스요. 한 시간에 한 대라 놓치면 그냥 걸었어요.'],
+        ['날씨는 어땠어요?', '바람이 너무 세서 우산이 소용없어요. 그래서 다들 우비를 입어요.'],
+        ['맛집 추천해 주세요', '동네 국숫집이요. 고기국수를 거의 매주 먹었어요.']
+      ],
+      fallback: ['위미리 살 때 얘기요? 귤밭 옆이라 겨울엔 귤 냄새가 났어요.', '바람이 정말 세요. 일 년 내내 머리가 엉망이었어요. 하하.'],
+      proof: ['대신 그때 딴 귤 맛은 아직도 기억나요.', '대신 고기국수 얘기는 한 시간도 할 수 있어요.']
+    },
+    {
+      n: 4, claim: '매운 걸 전혀 못 먹는다', truth: true,
+      brief: '사실이다. 거짓처럼 보이게 한다: 확답을 피하고 조건을 붙이거나, 허세처럼 말한다. 매운 걸 잘 먹는다고 말하지는 않는다.',
+      strong: ['매운', '맵', '매워'],
+      weak: ['떡볶이', '불닭', '고추', '라면', '짬뽕', '마라', '캡사이신', '청양'],
+      qa: [
+        ['진짜 매운 거 못 먹어요?', '음… 종류에 따라 다르죠.'],
+        ['떡볶이는 먹어요?', '떡볶이는… 가게에 따라 달라요. 하하.'],
+        ['불닭볶음면 먹어 봤어요?', '굳이 도전해 보고 싶지는 않네요.'],
+        ['마라탕 좋아해요?', '맵기 단계는 노코멘트 할게요.']
+      ],
+      fallback: ['그건… 그날그날 다르죠.', '음… 매운 기준이 사람마다 다르잖아요.']
+    },
+    {
+      n: 5, claim: '스카이다이빙을 해 본 적이 있다', truth: true,
+      brief: '사실이다. 거짓처럼 보이게 한다: 겸손하고 흐릿하게, 장소와 날짜는 기억이 안 나는 척 넘어간다. 해 봤다는 사실 자체는 부정하지 않는다.',
+      strong: ['스카이다이빙', '다이빙', '낙하산'],
+      weak: ['비행기', '뛰어내', '높이', '무서', '고소', '점프', '하늘'],
+      qa: [
+        ['어디서 했어요?', '꽤 오래전이라 장소는 기억이 가물가물해요.'],
+        ['무섭지 않았어요?', '다들 무섭다고 하더라고요.'],
+        ['몇 미터에서 뛰었어요?', '숫자까지 물어보실 줄은 몰랐네요. 하하.'],
+        ['영상 있어요?', PROOF_LINE],
+        ['또 할 거예요?', '그건… 상상에 맡길게요.']
+      ],
+      fallback: ['그게… 꽤 오래전 일이라서요.', '뭐… 뛰긴 했죠. 자세한 건 기억이 잘 안 나요.']
+    }
+  ];
+  const UNKNOWN = '음… 어떤 항목 얘기인지 한 번만 더 물어봐 주실래요?';
+  const RULES = [
+    '이름은 항상 고양이 보리, 콩이로만 부른다. 다른 이름이나 별명을 지어내지 않는다. 앞서 한 대답에 다른 이름이 있었더라도 이 이름을 쓴다.',
+    `사진, 메달, 물건 같은 증거를 직접 보여 달라거나 증명해 보라는 질문에는 어느 항목이든 똑같이 "${PROOF_LINE}"라고 답한다. 거짓 항목(2, 3)이면 그 뒤에 설정에 맞는 구체적인 디테일을 한 문장 덧붙이고, 진실 항목(1, 4, 5)이면 거절만 하고 끝낸다.`,
+    '거짓 항목(2, 3)은 절대 회피하지 않는다. "비밀이에요", "정답이 쉬워지잖아요" 같은 말은 쓰지 않는다. 설정에 없는 사실이 필요하면 설정과 어울리게 구체적으로 지어낸다.',
+    '진실 항목(1, 4, 5)은 사실을 부정하는 거짓말을 하지 않는다. 말투만 흐린다. 정답 공개 뒤에도 거짓말은 안 했다고 할 수 있어야 한다.',
+    '어느 항목이 진짜이고 어느 항목이 거짓인지, 게임 전략이 무엇인지 절대 드러내지 않는다.',
+    '한국어 구어체 존댓말로 1~2문장, 70자 안팎으로 짧게 답한다. 머뭇거림은 "음…", "그냥…", "하하"처럼 말로 표현한다. 괄호 속 지문, 따옴표, 이모지, 목록은 쓰지 않는다.',
+    '숫자는 소리 내어 읽기 좋게 쓴다. 예: "2~3년" 대신 "이삼 년".',
+    '어느 항목과도 상관없는 질문이면 item을 0으로 하고, 가볍게 웃으며 넘기는 한 문장으로 답한다.'
+  ];
+  ITEMS.forEach((it) => { it.qa = it.qa.map(([q, a]) => ({ q, a, g: grams(q) })); });
+
+  let picked = ITEMS.some((it) => it.n === keep.get('picked', 0)) ? keep.get('picked', 0) : 0;
+  let log = keep.get('log', []);
+  if (!Array.isArray(log)) log = [];
+  let auto = keep.get('auto', true) !== false;
+  let echo = keep.get('echo', true) !== false;
+  let ctl = null, seq = 0, sampleOff = false, last = { q: '', at: 0 };
+  const turn = {};
+  const sampleP = window.claude && typeof window.claude.use === 'function'
+    ? window.claude.use('sample').catch(() => null)
+    : Promise.resolve(null);
+
+  /* ---------- Matching a question ---------- */
+  function norm(s) { return String(s).toLowerCase().replace(/[^\p{L}\p{N}]/gu, ''); }
+  function grams(s) {
+    const t = norm(s), g = new Set();
+    for (let i = 0; i < t.length - 1; i++) g.add(t.slice(i, i + 2));
+    if (t.length === 1) g.add(t);
+    return g;
+  }
+  function dice(a, b) {
+    if (!a.size || !b.size) return 0;
+    let n = 0;
+    a.forEach((x) => { if (b.has(x)) n++; });
+    return (2 * n) / (a.size + b.size);
+  }
+
+  // Which claim the question is about, from its words; the picked card breaks ties.
+  function detect(q) {
+    const t = norm(q);
+    let best = 0, top = 0;
+    ITEMS.forEach((it) => {
+      const s = it.strong.reduce((n, k) => n + (t.includes(k) ? 2 : 0), 0) + it.weak.reduce((n, k) => n + (t.includes(k) ? 1 : 0), 0);
+      if (s > top || (s && s === top && it.n === picked)) { top = s; best = it.n; }
+    });
+    return best;
+  }
+
+  // The closest prepared question. Within a known claim a looser match is fine; across all
+  // claims it must be close, so "고양이 몇 살?" never gets another claim's answer.
+  function prepared(q, n) {
+    const g = grams(q);
+    let best = null;
+    ITEMS.forEach((it) => {
+      if (n && it.n !== n) return;
+      it.qa.forEach((p) => {
+        const s = dice(g, p.g);
+        if (!best || s > best.s) best = { s, n: it.n, a: p.a };
+      });
+    });
+    return best && best.s >= (n ? 0.5 : 0.62) ? best : null;
+  }
+
+  function fallbackFor(n) {
+    const it = ITEMS.find((x) => x.n === n);
+    if (!it) return UNKNOWN;
+    turn[n] = ((turn[n] == null ? -1 : turn[n]) + 1) % it.fallback.length;
+    return it.fallback[turn[n]];
+  }
+
+  // Requests to see proof get the same refusal on every claim, so refusing is never a clue;
+  // the two made-up claims add one concrete detail so they don't sound evasive.
+  const PROOF_ASK = /증거|증명|인증|입증|보여(줘|주|줄|달|봐|드)|확인시켜|가져와|직접보|실물/;
+  function proofAnswer(n) {
+    const it = ITEMS.find((x) => x.n === n);
+    if (!it || !it.proof) return PROOF_LINE;
+    const k = 'proof' + n;
+    turn[k] = ((turn[k] == null ? -1 : turn[k]) + 1) % it.proof.length;
+    return PROOF_LINE + ' ' + it.proof[turn[k]];
+  }
+
+  function clean(a) {
+    return String(a || '')
+      .replace(/\([^)]*\)|（[^）]*）/g, '')
+      .replace(/["“”「」『』]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /* ---------- Asking Claude ---------- */
+  function buildPrompt(q, hint) {
+    const L = [
+      '너는 지금 "진진가" 게임의 발표자 본인이다. 사람들이 발표자에 대한 다섯 항목을 보고 질문하면, 발표자로서 대답한다. 대답은 음성 합성으로 바로 소리 내어 읽힌다.',
+      '사람들은 다섯 항목 중 거짓 2개를 찾는다. 발표자의 목표는 진실은 거짓처럼, 거짓은 진실처럼 보이게 해서 사람들이 엉뚱한 2개를 고르게 하는 것이다.',
+      '',
+      '[항목과 대답 방식]'
+    ];
+    ITEMS.forEach((it) => L.push(`${it.n}. ${it.claim} — ${it.brief}`));
+    L.push('', '[규칙]');
+    RULES.forEach((r) => L.push('- ' + r));
+    L.push('', '[대답 예시 (질문 → 대답)]');
+    ITEMS.forEach((it) => it.qa.forEach((p) => L.push(`${it.n}번 | ${p.q} → ${p.a}`)));
+    // Answers from before the names were fixed (no rev) may carry made-up names, so Claude never sees them.
+    const said = log.filter((e) => e.rev === 2).slice(0, 6);
+    if (said.length) {
+      L.push('', '[이미 한 대답 (이것과 어긋나지 않게. 단, 이름은 규칙의 이름만 쓴다)]');
+      said.reverse().forEach((e) => L.push(`${e.q} → ${e.a}`));
+    }
+    L.push('', hint
+      ? `[참고] 이 질문은 ${hint}번 항목에 대한 것일 가능성이 높다. 다른 항목이 분명하면 그 항목으로 답한다.`
+      : '[참고] 질문이 어느 항목에 대한 것인지 직접 판단한다.');
+    L.push('', `질문: ${q}`, '',
+      'JSON 하나로만 답한다. 형식: {"item": 2, "answer": "보리랑 콩이예요. 보리는 치즈색이라 보리예요."}',
+      'item은 질문이 가리키는 항목 번호(1~5, 어느 항목도 아니면 0), answer는 소리 내어 읽을 대답이다.');
+    return L.join('\n');
+  }
+
+  // {n, a} on success, {error} on failure, null where this view cannot ask Claude.
+  async function fromClaude(q, hint) {
+    const sample = sampleOff ? null : await sampleP;
+    if (!sample) return null;
+    if (ctl) ctl.abort();
+    const mine = (ctl = new AbortController());
+    try {
+      const out = await sample.json(buildPrompt(q, hint), { modelTier: 'quick', signal: mine.signal });
+      const a = clean(out && out.answer);
+      if (!a) return { error: 'empty_completion' };
+      const n = Number(out.item);
+      return { n: n >= 1 && n <= 5 ? n : 0, a };
+    } catch (e) {
+      const code = (e && e.code) || 'upstream_error';
+      if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(code)) sampleOff = true;
+      return { error: code };
+    } finally {
+      if (ctl === mine) ctl = null;
+    }
+  }
+
+  function failNote(code) {
+    switch (code) {
+      case 'not_granted': return 'Claude 사용을 허용하지 않아서 준비한 기본 답변으로 대신해요.';
+      case 'rate_limited': return '질문이 너무 잦아서 Claude가 잠시 쉬어요. 준비한 기본 답변으로 대신해요.';
+      case 'session_expired': return 'Claude에 다시 로그인해야 해요. 지금은 준비한 기본 답변으로 대신해요.';
+      case 'sampling_disabled':
+      case 'not_declared':
+      case 'capability_disabled':
+      case 'capability_removed': return '이 화면에서는 Claude 답변을 쓸 수 없어서 준비한 기본 답변으로 대신해요.';
+      default: return 'Claude 답변을 받지 못해서 준비한 기본 답변으로 대신해요.';
+    }
+  }
+
+  /* ---------- Saying which question an answer is for ---------- */
+  // When many people ask at once in chat, an answer heard alone is hard to match to its
+  // question, so the booth reads the question (and the asker, if typed as "이름: 질문") first.
+  const ASKER = /^([^\s:：]{1,12})\s*[:：]\s*(.+)$/s;
+  function parseAsker(raw) {
+    const t = String(raw || '').trim();
+    // "3번: 사진 있어요?" (or "3번 사진 있어요?") points at a claim, not a person.
+    const num = t.match(/^([1-5])\s*번\s*[:：.,]?\s*(.+)$/s);
+    if (num) return { who: '', q: num[2].trim(), n: +num[1] };
+    const m = t.match(ASKER);
+    return m && !/^\d+번?$/.test(m[1]) ? { who: m[1], q: m[2].trim(), n: 0 } : { who: '', q: t, n: 0 };
+  }
+  function echoOf(q, who, num) {
+    let t = String(q).replace(/\s+/g, ' ').trim().replace(/[.!。！~]+$/, '');
+    if (t.length > 30) {
+      const cut = t.lastIndexOf(' ', 30);
+      t = t.slice(0, cut > 12 ? cut : 30) + '…, 이 질문이요.';
+    } else if (!/[?？]$/.test(t)) {
+      t += '?';
+    }
+    return (who ? `${who}님 질문, ` : num ? `${num}번 질문, ` : '') + t;
+  }
+  function spoken(en) {
+    return echo && en.q ? echoOf(en.q, en.who, en.num) + ' ' + en.a : en.a;
+  }
+
+  /* ---------- Answering ---------- */
+  async function ask(raw) {
+    const asked = parseAsker(raw);
+    const q = asked.q, who = asked.who, num = asked.n;
+    const now = Date.now();
+    // Enter that commits a Hangul syllable can submit twice; drop the echo.
+    if (now - last.at < 1200 && (!q || q === last.q)) return;
+    if (!q) { say('질문을 먼저 입력해 주세요.', 'warn'); qEl.focus(); return; }
+    last = { q, at: now };
+    const my = ++seq;
+    if (ctl) ctl.abort();
+    setBusy(false);
+    const hint = asked.n || detect(q) || picked;
+    if (PROOF_ASK.test(norm(q))) return answer(q, hint, proofAnswer(hint), null, who, num);
+    const hit = prepared(q, hint);
+    if (hit) return answer(q, hit.n, hit.a, null, who, num);
+
+    setBusy(true);
+    say('답변을 생각하는 중이에요…');
+    const res = await fromClaude(q, hint);
+    if (my !== seq) return;
+    setBusy(false);
+    if (res && res.a) return answer(q, res.n || hint, res.a, null, who, num);
+    if (res && res.error === 'cancelled') return;
+    const note = res ? failNote(res.error) : '비슷한 예상 질문이 없어서 준비한 기본 답변으로 대신해요.';
+    answer(q, hint, hint ? fallbackFor(hint) : UNKNOWN, note, who, num);
+  }
+
+  function answer(q, n, a, note, who, num) {
+    // The log keeps the bare answer: Claude sees it as an earlier reply, without the read-out question.
+    const en = { q, a, n, who: who || '', num: num || 0, rev: 2 };
+    log.unshift(en);
+    log = log.slice(0, 8);
+    keep.set('log', log);
+    renderLog();
+    const done = auto ? '답변을 대본에 넣고 읽어요.' : '답변을 대본에 넣었어요. 읽기를 누르면 읽어요.';
+    say((n ? `${n}번 항목 · ` : '') + (note || done), note ? 'warn' : 'info');
+    read(spoken(en), auto);
+  }
+
+  // Hand the text to the booth exactly as a person would: stop, type it in, press 읽기
+  // (with 자동 읽기 off it waits in the 대본 box for the 읽기 button).
+  function read(text, play = true) {
+    if (!stopBtn.disabled) stopBtn.click();
+    scriptEl.value = text;
+    scriptEl.dispatchEvent(new Event('input', { bubbles: true }));
+    if (play) playBtn.click();
+    const r = booth.getBoundingClientRect();
+    if (r.top < 0 || r.top > window.innerHeight - 120) {
+      booth.scrollIntoView({ block: 'start', behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    }
+  }
+
+  function say(msg, kind) {
+    statusEl.textContent = msg;
+    statusEl.dataset.kind = kind || 'info';
+  }
+
+  function setBusy(on) {
+    askBtn.textContent = on ? '생각하는 중…' : '답변 듣기';
+    form.setAttribute('aria-busy', on ? 'true' : 'false');
+  }
+
+  /* ---------- Cards, suggestions, log ---------- */
+  function renderCards() {
+    cardsEl.textContent = '';
+    ITEMS.forEach((it) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'jj-card';
+      b.dataset.n = it.n;
+      b.setAttribute('aria-pressed', String(it.n === picked));
+      const no = document.createElement('span');
+      no.className = 'jj-no';
+      no.textContent = it.n;
+      const claim = document.createElement('span');
+      claim.textContent = it.claim;
+      b.append(no, claim);
+      cardsEl.append(b);
+    });
+  }
+
+  function renderSuggest() {
+    suggestEl.textContent = '';
+    const it = ITEMS.find((x) => x.n === picked);
+    if (!it) {
+      const p = document.createElement('p');
+      p.className = 'jj-hint';
+      p.textContent = '항목 카드를 고르면 그 항목의 예상 질문이 나와요. 고르지 않아도 질문에서 항목을 알아서 찾아요.';
+      suggestEl.append(p);
+      return;
+    }
+    const label = document.createElement('span');
+    label.className = 'examples-label';
+    label.textContent = `${it.n}번 예상 질문`;
+    suggestEl.append(label);
+    it.qa.forEach((p) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.textContent = p.q;
+      b.addEventListener('click', () => ask(p.q));
+      suggestEl.append(b);
+    });
+  }
+
+  function pick(n) {
+    picked = n;
+    keep.set('picked', n);
+    cardsEl.querySelectorAll('.jj-card').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.n === n)));
+    renderSuggest();
+  }
+
+  const ICON_PLAY = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M8 5.6v12.8a1 1 0 0 0 1.52.85l10.3-6.4a1 1 0 0 0 0-1.7L9.52 4.75A1 1 0 0 0 8 5.6z" fill="currentColor"/></svg>';
+
+  function renderLog() {
+    logEl.textContent = '';
+    log.forEach((e, i) => {
+      const li = document.createElement('li');
+      li.className = 'jj-entry';
+      const tag = document.createElement('span');
+      tag.className = 'jj-tag';
+      tag.textContent = e.n ? `${e.n}번` : '기타';
+      const body = document.createElement('div');
+      body.className = 'jj-entry-body';
+      const q = document.createElement('p');
+      q.className = 'jj-q';
+      q.textContent = e.who ? `${e.who}: ${e.q}` : e.num ? `${e.num}번: ${e.q}` : e.q;
+      const a = document.createElement('p');
+      a.className = 'jj-a';
+      a.textContent = e.a;
+      body.append(q, a);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'icon-btn';
+      b.dataset.i = i;
+      b.title = '다시 읽기';
+      b.setAttribute('aria-label', `다시 읽기: ${e.q}`);
+      b.innerHTML = ICON_PLAY;
+      li.append(tag, body, b);
+      logEl.append(li);
+    });
+    logSum.textContent = `지난 질문 ${log.length}개`;
+    logWrap.hidden = !log.length;
+  }
+
+  cardsEl.addEventListener('click', (e) => {
+    const b = e.target.closest('.jj-card');
+    if (!b) return;
+    pick(+b.dataset.n === picked ? 0 : +b.dataset.n);
+    if (canHover.matches) qEl.focus();
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    // Read the box on the next tick so a syllable the Enter key just committed is included.
+    setTimeout(() => {
+      const q = qEl.value;
+      qEl.value = '';
+      ask(q);
+    }, 0);
+  });
+
+  introBtn.addEventListener('click', () => {
+    say('다섯 항목을 소개해요.');
+    read('제 소개 다섯 가지예요. ' + ITEMS.map((it) => `${it.n}번, ${it.claim}.`).join(' '));
+  });
+
+  logEl.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-i]');
+    const en = b && log[+b.dataset.i];
+    if (!en) return;
+    say((en.n ? `${en.n}번 항목 · ` : '') + '지난 답변을 다시 읽어요.');
+    read(spoken(en));
+  });
+
+  logClear.addEventListener('click', () => {
+    log = [];
+    keep.set('log', log);
+    renderLog();
+  });
+
+  function renderAuto() {
+    autoBtn.setAttribute('aria-pressed', String(auto));
+    autoBtn.lastChild.textContent = auto ? '자동 읽기 켬' : '자동 읽기 끔';
+    autoBtn.title = auto ? '질문의 답을 대본에 넣으면 바로 읽어요' : '질문의 답을 대본에 넣기만 하고, 읽기는 직접 눌러요';
+  }
+
+  autoBtn.addEventListener('click', () => {
+    auto = !auto;
+    keep.set('auto', auto);
+    renderAuto();
+  });
+
+  function renderEcho() {
+    echoBtn.setAttribute('aria-pressed', String(echo));
+    echoBtn.lastChild.textContent = echo ? '질문 먼저 읽기 켬' : '질문 먼저 읽기 끔';
+    echoBtn.title = echo
+      ? '답변 앞에 질문을 먼저 읽어요. "이름: 질문"으로 입력하면 이름도 읽어요'
+      : '답변만 읽어요';
+  }
+
+  echoBtn.addEventListener('click', () => {
+    echo = !echo;
+    keep.set('echo', echo);
+    renderEcho();
+  });
+
+  renderEcho();
+  renderAuto();
+  renderCards();
+  renderSuggest();
+  renderLog();
+})();
+</script>
+
+</body></html>

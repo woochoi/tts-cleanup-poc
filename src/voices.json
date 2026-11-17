@@ -1,0 +1,11 @@
+[
+  {
+    "id": "my_voice",
+    "name": "내 목소리",
+    "name_eng": "My voice",
+    "gender": null,
+    "age": null,
+    "use_cases": [],
+    "ref": "../refs/my_voice.wav"
+  }
+]
