@@ -105,10 +105,29 @@ src/server.py            로컬 음성 서버 (Claude 데스크톱 앱의 MCP �
 src/typecast_server.mjs  비교용 Typecast 연결 서버 (API 키 필요)
 web/nangdok-booth.html   낭독 부스 화면 (현장 적용 데모). 진진가 다섯 항목은 가상의 발표자 예시
 web/serve.py             낭독 부스를 웹사이트로 띄우는 서버 (python web/serve.py)
-eval/                    평가 문장, 평가·판정 스크립트, 결과표
+eval/                    평가 문장, 평가·판정 스크립트, 결과표, 처리 전·후 샘플
+assets/                  README 시연용 스크린샷
 ```
 
 ## 시연
+
+### 화면
+
+**낭독 부스 · 진진가 패널**: 질문을 넣으면 질문을 먼저 읽고 답을 읽도록 대본에 들어갑니다. 다섯 항목은 가상의 예시 인물입니다.
+
+![낭독 부스 진진가 패널](assets/booth-jinjinga.jpg)
+
+**낭독 부스 · 내 목소리 등록**: 음성 톤에서 '내 목소리'를 고르고, 녹음하거나 파일을 올려 자기 목소리를 등록합니다.
+
+![내 목소리 등록 화면](assets/booth-my-voice.jpg)
+
+**듣기 판정 페이지**: 처리 전·후를 나란히 듣고 세 가지를 판정해 `eval/listening.csv`에 저장합니다.
+
+![듣기 판정 페이지](assets/listening-page.jpg)
+
+**판정 결과 요약**: 처리 전 꼬리 있음 15/20 → 처리 후 0/20, 단어 잘림 0/20.
+
+![판정 결과 요약](assets/listening-summary.jpg)
 
 ### 처리 전·후 음성 비교 (대표 사례 3개)
 
